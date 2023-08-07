@@ -12,7 +12,7 @@ public class PlayerInputHandler : MonoBehaviour
     protected event EventHandler OnLeftPressed;
     
     private PlayerInputs _playerInputs;
-    private void Awake()
+    protected virtual void Awake()
     {
         _playerInputs = new PlayerInputs();
         
@@ -42,12 +42,12 @@ public class PlayerInputHandler : MonoBehaviour
         OnUpPressed?.Invoke(this, EventArgs.Empty);
     }
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         _playerInputs.Enable();
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         _playerInputs.Disable();
     }

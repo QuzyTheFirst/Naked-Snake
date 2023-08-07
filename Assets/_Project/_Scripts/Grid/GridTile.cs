@@ -1,20 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GridTile : MonoBehaviour
 {
-    public enum GridTileType
+    public enum TileType
     {
         WalkingTile,
         DeathTile,
         SpawnTile,
     }
 
-    [SerializeField] private GridTileType _gridTileType;
+    [SerializeField] private TileType tileType;
     private Vector2Int _gridPosition;
 
-    public GridTileType CurrentGridTileType => _gridTileType;
+    public TileType CurrentTileType => tileType;
     public Vector2Int GridPosition
     {
         get { return _gridPosition; }

@@ -110,4 +110,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35ac566aed1231c4f9aa4e3abcb27811, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gridTileType: 1
+  tileType: 1

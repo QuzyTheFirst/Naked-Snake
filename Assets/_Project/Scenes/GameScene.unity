@@ -354,6 +354,52 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 69.59, y: -30, z: 0}
+--- !u!1 &789505810
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 789505812}
+  - component: {fileID: 789505811}
+  m_Layer: 0
+  m_Name: '[FruitSpawner]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &789505811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789505810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17ae263d3a5b67f4f9dba42b66049eb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _fruitPf: {fileID: 2749281546091979995, guid: e0c58b959a3bf3c4db285beb90d7760f,
+    type: 3}
+--- !u!4 &789505812
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789505810}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 13.405142, y: 25.602537, z: -16.049747}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &797832220
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,7 +496,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -474,14 +520,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: -0.5021036, y: -0.49788168, z: 0.5017988, w: -0.49820054}
-  m_LocalPosition: {x: -0.85, y: 21.84, z: -1.15}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 5.6, y: 9.9, z: 3.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1 &1523404958
 GameObject:
   m_ObjectHideFlags: 0
@@ -515,8 +561,8 @@ MonoBehaviour:
   _inGameUI: {fileID: 8674125216987080110}
   _levelGenerator: {fileID: 2070890401}
   _gameStateController: {fileID: 1951342231}
-  _snakeHead: {fileID: 1847060906041987090, guid: e3f443ade4d2de14a9aa13c096cc0ef1,
-    type: 3}
+  _fruitSpawner: {fileID: 789505811}
+  snake: {fileID: 1847060906041987086, guid: e3f443ade4d2de14a9aa13c096cc0ef1, type: 3}
 --- !u!4 &1523404960
 Transform:
   m_ObjectHideFlags: 0
