@@ -1,0 +1,106 @@
+{
+    "name": "PlayerInputs",
+    "maps": [
+        {
+            "name": "Map",
+            "id": "e483aaf3-12e5-4684-ab9b-84dedb9b78fa",
+            "actions": [
+                {
+                    "name": "UP",
+                    "type": "Button",
+                    "id": "95463e89-5c65-4897-8212-6772ab70f705",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DOWN",
+                    "type": "Button",
+                    "id": "ce81c1cd-f51b-403a-8c7f-1575f58db0c5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RIGHT",
+                    "type": "Button",
+                    "id": "dcde5f3b-616a-4971-a7b1-719c69f5d504",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LEFT",
+                    "type": "Button",
+                    "id": "87dbc1a6-5d78-4172-b70e-eab0805d958b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d165f112-343d-463a-a7fb-b8bab2e9b057",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "UP",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b350245a-ee5c-460c-9b62-3d8276a504d3",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "DOWN",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9c77e119-625e-4472-8b67-eb6184f8d1d3",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "RIGHT",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "91eadf99-a809-4a9f-a8a7-f912878fc2d7",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "LEFT",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Keyboard",
+            "bindingGroup": "Keyboard",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
