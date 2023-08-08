@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.WSA;
 
-public class GridItems : IGrid<GridIntItem>
+public class GridItems : IGrid<GridTransformItem>
 {
-    private GridIntItem[,] _grid;
+    private GridTransformItem[,] _grid;
     
     private int _gridSizeX;
     private int _gridSizeY;
     
     public void ResetGrid()
     {
-        _grid = new GridIntItem[_gridSizeX, _gridSizeY];
+        _grid = new GridTransformItem[_gridSizeX, _gridSizeY];
     }
 
     public void SetGridSize(int gridSizeX, int gridSizeY)
@@ -22,15 +22,15 @@ public class GridItems : IGrid<GridIntItem>
         ResetGrid();
     }
     
-    public void SetGridTiles(IReadOnlyList<GridIntItem> gridItems)
+    public void SetGridTiles(IReadOnlyList<GridTransformItem> gridItems)
     {
-        foreach (GridIntItem gridItem in gridItems)
+        foreach (GridTransformItem gridItem in gridItems)
         {
             _grid[gridItem.X, gridItem.Y] = gridItem;
         }
     }
 
-    public GridIntItem TryGetTile(int x, int y)
+    public GridTransformItem TryGetTile(int x, int y)
     {
         if (_grid == null)
             return null;
@@ -41,7 +41,7 @@ public class GridItems : IGrid<GridIntItem>
         return _grid[x, y];
     }
     
-    public bool TrySetTile(GridIntItem tile)
+    public bool TrySetTile(GridTransformItem tile)
     {
         if (_grid == null)
             return false;
@@ -50,6 +50,18 @@ public class GridItems : IGrid<GridIntItem>
             return false;
 
         _grid[tile.X, tile.Y] = tile;
+        return true;
+    }
+
+    public bool TryClearTile(int x, int y)
+    {
+        if (_grid == null)
+            return false;
+        
+        if (x < 0 || x >= _grid.GetLength(0) || y < 0 || y >= _grid.GetLength(1))
+            return false;
+
+        _grid[x, y] = null;
         return true;
     }
 }

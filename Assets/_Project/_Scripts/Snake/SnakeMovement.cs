@@ -13,6 +13,8 @@ using Vector3 = UnityEngine.Vector3;
 
 public class SnakeMovement : PlayerInputHandler
 {
+    public static event EventHandler<Vector2Int> OnSnakeHitFruit;
+    
     enum MovementDirection
     {
         Up, 
@@ -21,6 +23,7 @@ public class SnakeMovement : PlayerInputHandler
         Right
     }
     private MovementDirection _movementDirection = MovementDirection.Up;
+    private MovementDirection _lastStepMoveDir;
 
     public enum SnakeState
     {
@@ -32,15 +35,13 @@ public class SnakeMovement : PlayerInputHandler
     [SerializeField] private int _moveEach_ms = 500;
     private float _moveTimer;
 
-    private GridSnakes _gridSnakes;
-    private GridTiles _gridTiles;
+    private GridsManipulator _gridsManipulator;
     private GridTile _currentGridTile;
     private float _distanceBetweenTiles;
 
-    public void Initialize(GridSnakes gridSnakes, GridTiles gridTiles, GridTile gridTile, float distanceBetweenTiles)
+    public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, float distanceBetweenTiles)
     {
-        _gridSnakes = gridSnakes;
-        _gridTiles = gridTiles;
+        _gridsManipulator = gridsManipulator;
         _currentGridTile = gridTile;
         _distanceBetweenTiles = distanceBetweenTiles;
     }
@@ -53,7 +54,7 @@ public class SnakeMovement : PlayerInputHandler
             
             // Finding Next Tile
             Vector2Int nextTilePosition = new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
-            GridTile nextTile = _gridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);
+            GridTile nextTile = _gridsManipulator.GridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);
 
             if (nextTile == null)
             {
@@ -61,13 +62,21 @@ public class SnakeMovement : PlayerInputHandler
                 continue;
             }
             
+            _currentGridTile = nextTile;
+            
             // Changing Snake Position
-            Vector3 newSnakePosition = new Vector3(nextTile.X, 0, nextTile.Y) * _distanceBetweenTiles + Vector3.up;
+            UpdateSnakeGridPosition();
+            
+            Vector3 newSnakePosition = new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * _distanceBetweenTiles + Vector3.up;
             transform.position = newSnakePosition;
 
-            _currentGridTile = nextTile;
-
-            UpdateSnakesGrid();
+            _lastStepMoveDir = _movementDirection;
+            
+            // Check New Tile For Things
+            if (_gridsManipulator.CheckTileForFruit(_currentGridTile.X, _currentGridTile.Y))
+            {
+                OnSnakeHitFruit?.Invoke(this, new Vector2Int(_currentGridTile.X, _currentGridTile.Y));
+            }
             
             if (_currentGridTile.CurrentTileType == GridTile.TileType.DeathTile)
             {
@@ -78,14 +87,14 @@ public class SnakeMovement : PlayerInputHandler
         Debug.Log("Snake is dead");
     }
 
-    private void UpdateSnakesGrid()
+    private void UpdateSnakeGridPosition()
     {
-        _gridSnakes.ResetGrid();
+        _gridsManipulator.GridSnakes.ResetGrid();
         GridIntItem item = new GridIntItem();
         item.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
-        _gridSnakes.TrySetTile(item);
+        _gridsManipulator.GridSnakes.TrySetTile(item);
     }
-    
+
     private Vector2Int Get2DMovementDirection()
     {
         switch (_movementDirection)
@@ -108,6 +117,28 @@ public class SnakeMovement : PlayerInputHandler
         }
     }
 
+    private MovementDirection GetOposingMovementDirection(MovementDirection direction)
+    {
+        switch (direction)
+        {
+            case MovementDirection.Up:
+                return MovementDirection.Down;
+                break;
+            case MovementDirection.Down:
+                return MovementDirection.Up;
+                break;
+            case MovementDirection.Left:
+                return MovementDirection.Right;
+                break;
+            case MovementDirection.Right:
+                return MovementDirection.Left;
+                break;
+            default:
+                throw new Exception("Where are you even going?");
+                break;
+        }
+    }
+    
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -119,7 +150,7 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnRightPressed(object sender, EventArgs e)
     {
-        if (_movementDirection == MovementDirection.Right || _movementDirection == MovementDirection.Left)
+        if (MovementDirection.Right == GetOposingMovementDirection(_lastStepMoveDir))
             return;
 
         _movementDirection = MovementDirection.Right;
@@ -128,7 +159,7 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnLeftPressed(object sender, EventArgs e)
     {
-        if (_movementDirection == MovementDirection.Right || _movementDirection == MovementDirection.Left)
+        if (MovementDirection.Left == GetOposingMovementDirection(_lastStepMoveDir))
             return;
 
         _movementDirection = MovementDirection.Left;
@@ -137,16 +168,16 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnDownPressed(object sender, EventArgs e)
     {
-        if (_movementDirection == MovementDirection.Down || _movementDirection == MovementDirection.Up)
+        if (MovementDirection.Down == GetOposingMovementDirection(_lastStepMoveDir))
             return;
-
+        
         _movementDirection = MovementDirection.Down;
         transform.rotation = Quaternion.LookRotation(Vector3.back);
     }
 
     private void SnakeHead_OnUpPressed(object sender, EventArgs e)
     {
-        if (_movementDirection == MovementDirection.Down || _movementDirection == MovementDirection.Up)
+        if (MovementDirection.Up == GetOposingMovementDirection(_lastStepMoveDir))
             return;
 
         _movementDirection = MovementDirection.Up;

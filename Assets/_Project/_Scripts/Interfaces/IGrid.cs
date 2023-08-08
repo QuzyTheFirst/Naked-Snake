@@ -13,4 +13,6 @@ public interface IGrid<T>
     public T TryGetTile(int x, int y);
 
     public bool TrySetTile(T tile);
+
+    public bool TryClearTile(int x, int y);
 }

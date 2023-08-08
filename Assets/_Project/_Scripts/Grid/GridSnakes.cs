@@ -51,4 +51,16 @@ public class GridSnakes : IGrid<GridIntItem>
         _grid[tile.X, tile.Y] = tile;
         return true;
     }
+    
+    public bool TryClearTile(int x, int y)
+    {
+        if (_grid == null)
+            return false;
+        
+        if (x < 0 || x >= _grid.GetLength(0) || y < 0 || y >= _grid.GetLength(1))
+            return false;
+
+        _grid[x, y] = null;
+        return true;
+    }
 }

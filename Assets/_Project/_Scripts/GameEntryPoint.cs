@@ -17,6 +17,7 @@ public class GameEntryPoint : MonoBehaviour
     private GridTiles _gridTiles;
     private GridItems _gridItems;
     private GridSnakes _gridSnakes;
+    private GridsManipulator _gridsManipulator;
     
     private void Start()
     {
@@ -24,10 +25,11 @@ public class GameEntryPoint : MonoBehaviour
         _gridTiles = new GridTiles();
         _gridItems = new GridItems();
         _gridSnakes = new GridSnakes();
+        _gridsManipulator = new GridsManipulator(_gridTiles, _gridSnakes, _gridItems);
         
         _inGameUI.Initialize(_sceneController, _gameStateController);
         _gameStateController.Initialize(_inGameUI);
-        _fruitSpawner.Initialize(_gridItems, _gridTiles, _levelGenerator.DistanceBetweenTiles);
+        _fruitSpawner.Initialize(_gridsManipulator, _levelGenerator.DistanceBetweenTiles);
         
         // Setting Up Level
         _levelGenerator.GenerateLevel();
@@ -45,7 +47,7 @@ public class GameEntryPoint : MonoBehaviour
         GridTile tile = _gridTiles.GetRandomSpawnTile();
         Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _levelGenerator.DistanceBetweenTiles + Vector3.up;
         SnakeMovement snakeMovement = Instantiate(snake, spawnPos, Quaternion.identity);
-        snakeMovement.Initialize(_gridSnakes, _gridTiles, tile, _levelGenerator.DistanceBetweenTiles);
+        snakeMovement.Initialize(_gridsManipulator, tile, _levelGenerator.DistanceBetweenTiles);
         
         // Let Snake Go Wild
         snakeMovement.StartMoving();

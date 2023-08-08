@@ -7,29 +7,50 @@ public class FruitSpawner : MonoBehaviour
 {
     [SerializeField] private Transform _fruitPf;
 
-    private GridItems _gridItems;
-    private GridTiles _gridTiles;
+    private GridsManipulator _gridsManipulator;
     private float _distanceBetweenTiles;
+
+    public static event EventHandler OnFruitEaten;
     
-    public void Initialize(GridItems gridItems, GridTiles gridTiles , float distanceBetweenTiles)
+    public void Initialize(GridsManipulator gridsManipulator , float distanceBetweenTiles)
     {
-        _gridItems = gridItems;
-        _gridTiles = gridTiles;
+        _gridsManipulator = gridsManipulator;
         _distanceBetweenTiles = distanceBetweenTiles;
     }
     
     public void SpawnFruit()
     {
-        GridTile tile = _gridTiles.GetRandomWalkableTile();
+        GridTile tile = _gridsManipulator.GridTiles.GetRandomWalkableTile();
         
         if (tile == null) 
             throw new Exception("Walkable Tile Wasn't found");
         
         Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _distanceBetweenTiles + Vector3.up;
-        Instantiate(_fruitPf, spawnPos, Quaternion.identity);
+        Transform fruit = Instantiate(_fruitPf, spawnPos, Quaternion.identity);
 
-        GridIntItem item = new GridIntItem();
-        item.SetItem(tile.X, tile.Y, 1);
-        _gridItems.TrySetTile(item);
+        GridTransformItem item = new GridTransformItem();
+        item.SetItem(tile.X, tile.Y, fruit);
+        _gridsManipulator.GridItems.TrySetTile(item);
+    }
+
+    private void OnEnable()
+    {
+        SnakeMovement.OnSnakeHitFruit += SnakeMovement_OnSnakeHitFruit;
+    }
+
+    private void SnakeMovement_OnSnakeHitFruit(object sender, Vector2Int fruitPos)
+    {
+        GridTransformItem item = _gridsManipulator.GridItems.TryGetTile(fruitPos.x, fruitPos.y);
+
+        _gridsManipulator.GridItems.TryClearTile(fruitPos.x, fruitPos.y);
+        Destroy(item.Value.gameObject);
+        OnFruitEaten?.Invoke(this, EventArgs.Empty);
+        
+        SpawnFruit();
+    }
+
+    private void OnDisable()
+    {
+        SnakeMovement.OnSnakeHitFruit -= SnakeMovement_OnSnakeHitFruit;
     }
 }
