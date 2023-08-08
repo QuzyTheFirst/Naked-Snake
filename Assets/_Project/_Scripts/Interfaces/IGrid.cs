@@ -4,9 +4,13 @@ using UnityEngine;
 
 public interface IGrid<T>
 {
-    public void ResetGrid(int gridSizeX, int gridSizeY);
+    public void ResetGrid();
 
-    public void SetGridObjects(IReadOnlyList<T> gridItems);
+    public void SetGridSize(int gridSizeX, int gridSizeY);
 
-    public T GetTile(int x, int y);
+    public void SetGridTiles(IReadOnlyList<T> gridItems);
+
+    public T TryGetTile(int x, int y);
+
+    public bool TrySetTile(T tile);
 }

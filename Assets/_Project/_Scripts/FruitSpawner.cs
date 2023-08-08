@@ -27,5 +27,9 @@ public class FruitSpawner : MonoBehaviour
         
         Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _distanceBetweenTiles + Vector3.up;
         Instantiate(_fruitPf, spawnPos, Quaternion.identity);
+
+        GridIntItem item = new GridIntItem();
+        item.SetItem(tile.X, tile.Y, 1);
+        _gridItems.TrySetTile(item);
     }
 }

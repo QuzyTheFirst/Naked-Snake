@@ -1,15 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.WSA;
 
-public class GridItems : IGrid<GridIntItem>
+public class GridSnakes : IGrid<GridIntItem>
 {
     private GridIntItem[,] _grid;
-    
+
     private int _gridSizeX;
     private int _gridSizeY;
-    
+
     public void ResetGrid()
     {
         _grid = new GridIntItem[_gridSizeX, _gridSizeY];
@@ -40,7 +39,7 @@ public class GridItems : IGrid<GridIntItem>
         
         return _grid[x, y];
     }
-    
+
     public bool TrySetTile(GridIntItem tile)
     {
         if (_grid == null)

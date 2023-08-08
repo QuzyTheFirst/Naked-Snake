@@ -32,12 +32,14 @@ public class SnakeMovement : PlayerInputHandler
     [SerializeField] private int _moveEach_ms = 500;
     private float _moveTimer;
 
+    private GridSnakes _gridSnakes;
     private GridTiles _gridTiles;
     private GridTile _currentGridTile;
     private float _distanceBetweenTiles;
 
-    public void Initialize(GridTiles gridTiles, GridTile gridTile, float distanceBetweenTiles)
+    public void Initialize(GridSnakes gridSnakes, GridTiles gridTiles, GridTile gridTile, float distanceBetweenTiles)
     {
+        _gridSnakes = gridSnakes;
         _gridTiles = gridTiles;
         _currentGridTile = gridTile;
         _distanceBetweenTiles = distanceBetweenTiles;
@@ -51,7 +53,7 @@ public class SnakeMovement : PlayerInputHandler
             
             // Finding Next Tile
             Vector2Int nextTilePosition = new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
-            GridTile nextTile = _gridTiles.GetTile(nextTilePosition.x, nextTilePosition.y);
+            GridTile nextTile = _gridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);
 
             if (nextTile == null)
             {
@@ -65,6 +67,8 @@ public class SnakeMovement : PlayerInputHandler
 
             _currentGridTile = nextTile;
 
+            UpdateSnakesGrid();
+            
             if (_currentGridTile.CurrentTileType == GridTile.TileType.DeathTile)
             {
                 _snakeState = SnakeState.Dead;
@@ -74,6 +78,14 @@ public class SnakeMovement : PlayerInputHandler
         Debug.Log("Snake is dead");
     }
 
+    private void UpdateSnakesGrid()
+    {
+        _gridSnakes.ResetGrid();
+        GridIntItem item = new GridIntItem();
+        item.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
+        _gridSnakes.TrySetTile(item);
+    }
+    
     private Vector2Int Get2DMovementDirection()
     {
         switch (_movementDirection)

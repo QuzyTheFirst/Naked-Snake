@@ -7,6 +7,9 @@ public class GridTiles : IGrid<GridTile>
     private GridTile[,] _grid;
 
     private Dictionary<GridTile.TileType, List<GridTile>> _gridTilesDictionary;
+
+    private int _gridSizeX;
+    private int _gridSizeY;
     
     public IReadOnlyDictionary<GridTile.TileType, List<GridTile>> GridTilesDictionary => _gridTilesDictionary;
 
@@ -15,9 +18,9 @@ public class GridTiles : IGrid<GridTile>
         _gridTilesDictionary = new Dictionary<GridTile.TileType, List<GridTile>>();
     }
     
-    public void ResetGrid(int gridSizeX, int gridSizeY)
+    public void ResetGrid()
     {
-        _grid = new GridTile[gridSizeX, gridSizeY];
+        _grid = new GridTile[_gridSizeX, _gridSizeY];
         _gridTilesDictionary.Clear();
         
         _gridTilesDictionary.Add(GridTile.TileType.DeathTile, new List<GridTile>());
@@ -25,7 +28,14 @@ public class GridTiles : IGrid<GridTile>
         _gridTilesDictionary.Add(GridTile.TileType.WalkingTile, new List<GridTile>());
     }
 
-    public void SetGridObjects(IReadOnlyList<GridTile> gridTiles)
+    public void SetGridSize(int gridSizeX, int gridSizeY)
+    {
+        _gridSizeX = gridSizeX;
+        _gridSizeY = gridSizeY;
+        ResetGrid();
+    }
+    
+    public void SetGridTiles(IReadOnlyList<GridTile> gridTiles)
     {
         Debug.Log("Count" + gridTiles.Count);
         
@@ -37,7 +47,7 @@ public class GridTiles : IGrid<GridTile>
         }
     }
 
-    public GridTile GetTile(int x, int y)
+    public GridTile TryGetTile(int x, int y)
     {
         if (_grid == null)
             return null;
@@ -46,6 +56,18 @@ public class GridTiles : IGrid<GridTile>
             return null;
         
         return _grid[x, y];
+    }
+
+    public bool TrySetTile(GridTile tile)
+    {
+        if (_grid == null)
+            return false;
+
+        if (tile.X < 0 || tile.X >= _grid.GetLength(0) || tile.Y < 0 || tile.Y >= _grid.GetLength(1))
+            return false;
+
+        _grid[tile.X, tile.Y] = tile;
+        return true;
     }
 
     public GridTile GetRandomSpawnTile()
