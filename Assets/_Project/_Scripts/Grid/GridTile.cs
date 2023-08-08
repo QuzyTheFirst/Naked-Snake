@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class GridTile : MonoBehaviour
+public class GridTile : IGridItem<GridTile.TileType>
 {
     public enum TileType
     {
@@ -11,14 +11,21 @@ public class GridTile : MonoBehaviour
         DeathTile,
         SpawnTile,
     }
-
-    [SerializeField] private TileType tileType;
-    private Vector2Int _gridPosition;
-
-    public TileType CurrentTileType => tileType;
-    public Vector2Int GridPosition
+    
+    private int _x;
+    private int _y;
+    
+    private TileType _currentTileType;
+    
+    public int X => _x;
+    public int Y => _y;
+    
+    public TileType CurrentTileType => _currentTileType;
+    
+    public void SetItem(int x, int y, TileType gridItem)
     {
-        get { return _gridPosition; }
-        set { _gridPosition = value; }
+        _x = x;
+        _y = y;
+        _currentTileType = gridItem;
     }
 }

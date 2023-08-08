@@ -14,27 +14,34 @@ public class GameEntryPoint : MonoBehaviour
 
     [SerializeField] private SnakeMovement snake;
 
-    private GridController _gridController;
+    private GridTiles _gridTiles;
+    private GridItems _gridItems;
     
     private void Start()
     {
         // Initializing Variables
-        _gridController = new GridController();
+        _gridTiles = new GridTiles();
+        _gridItems = new GridItems();
         
         _inGameUI.Initialize(_sceneController, _gameStateController);
         _gameStateController.Initialize(_inGameUI);
-        _levelGenerator.Initialize(_gridController);
-        _fruitSpawner.Initialize(_gridController, _levelGenerator.DistanceBetweenTiles);
+        _fruitSpawner.Initialize(_gridItems, _gridTiles, _levelGenerator.DistanceBetweenTiles);
         
         // Setting Up Level
         _levelGenerator.GenerateLevel();
+        
+        _gridTiles.ResetGrid(_levelGenerator.GridSize.x, _levelGenerator.GridSize.y);
+        _gridTiles.SetGridObjects(_levelGenerator.GridTiles);
+        
+        _gridItems.ResetGrid(_levelGenerator.GridSize.x, _levelGenerator.GridSize.y);
+        
         _fruitSpawner.SpawnFruit();
-
+        
         // Spawning Snake
-        GridTile tile = _gridController.GetRandomSpawnTile();
-        Vector3 spawnPos = new Vector3(tile.GridPosition.x, 0, tile.GridPosition.y) * _levelGenerator.DistanceBetweenTiles + Vector3.up;
+        GridTile tile = _gridTiles.GetRandomSpawnTile();
+        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _levelGenerator.DistanceBetweenTiles + Vector3.up;
         SnakeMovement snakeMovement = Instantiate(snake, spawnPos, Quaternion.identity);
-        snakeMovement.Initialize(_gridController, tile, _levelGenerator.DistanceBetweenTiles);
+        snakeMovement.Initialize(_gridTiles, tile, _levelGenerator.DistanceBetweenTiles);
         
         // Let Snake Go Wild
         snakeMovement.StartMoving();

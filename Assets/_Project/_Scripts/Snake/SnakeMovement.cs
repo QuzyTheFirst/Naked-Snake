@@ -32,13 +32,13 @@ public class SnakeMovement : PlayerInputHandler
     [SerializeField] private int _moveEach_ms = 500;
     private float _moveTimer;
 
-    private GridController _gridController;
+    private GridTiles _gridTiles;
     private GridTile _currentGridTile;
     private float _distanceBetweenTiles;
 
-    public void Initialize(GridController gridController, GridTile gridTile, float distanceBetweenTiles)
+    public void Initialize(GridTiles gridTiles, GridTile gridTile, float distanceBetweenTiles)
     {
-        _gridController = gridController;
+        _gridTiles = gridTiles;
         _currentGridTile = gridTile;
         _distanceBetweenTiles = distanceBetweenTiles;
     }
@@ -50,8 +50,8 @@ public class SnakeMovement : PlayerInputHandler
             await Task.Delay(_moveEach_ms);
             
             // Finding Next Tile
-            Vector2Int nextTilePosition = _currentGridTile.GridPosition + Get2DMovementDirection();
-            GridTile nextTile = _gridController.GetTile(nextTilePosition.x, nextTilePosition.y);
+            Vector2Int nextTilePosition = new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
+            GridTile nextTile = _gridTiles.GetTile(nextTilePosition.x, nextTilePosition.y);
 
             if (nextTile == null)
             {
@@ -60,9 +60,9 @@ public class SnakeMovement : PlayerInputHandler
             }
             
             // Changing Snake Position
-            Vector3 newSnakePosition = new Vector3(nextTile.GridPosition.x, 0, nextTile.GridPosition.y) * _distanceBetweenTiles + Vector3.up;
+            Vector3 newSnakePosition = new Vector3(nextTile.X, 0, nextTile.Y) * _distanceBetweenTiles + Vector3.up;
             transform.position = newSnakePosition;
-            
+
             _currentGridTile = nextTile;
 
             if (_currentGridTile.CurrentTileType == GridTile.TileType.DeathTile)

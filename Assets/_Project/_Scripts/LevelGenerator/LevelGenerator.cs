@@ -11,19 +11,19 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private ColorToPrefab[] colorMappings;
     
     [SerializeField] private float _distanceBetweenTiles = 1.2f;
-
-    private GridController _gridController;
+    
+    private List<GridTile> _gridTiles;
+    private List<Tile> _tiles;
 
     public float DistanceBetweenTiles => _distanceBetweenTiles;
+    public Vector2Int GridSize => new Vector2Int(_map.width, _map.height);
+    public IReadOnlyList<GridTile> GridTiles => _gridTiles;
     
-    public void Initialize(GridController gridController)
-    {
-        _gridController = gridController;
-    }
 
     public void GenerateLevel()
     {
-        List<GridTile> gridTiles = new List<GridTile>();
+        _gridTiles = new List<GridTile>();
+        _tiles = new List<Tile>();
 
         for (int x = 0; x < _map.width; x++)
         {
@@ -31,11 +31,12 @@ public class LevelGenerator : MonoBehaviour
             {
                 GridTile tile = GenerateTile(x, y);
                 
-                if(tile != null) gridTiles.Add(tile);
+                if (tile == null)
+                    continue;
+                
+                _gridTiles.Add(tile);
             }
         }
-        
-        _gridController.SetGrid(_map.width, _map.height, gridTiles);
     }
 
     private GridTile GenerateTile(int x, int y)
@@ -47,14 +48,16 @@ public class LevelGenerator : MonoBehaviour
 
         foreach (ColorToPrefab colorMapping in colorMappings)
         {
-            Debug.Log(colorMapping.color + " | " + pixelColor);
-            
             if (colorMapping.color.Equals(pixelColor))
             {
                 Vector3 spawnPosition = new Vector3(x, 0, y);
-                GridTile tile = Instantiate(colorMapping.prefab, spawnPosition * _distanceBetweenTiles, Quaternion.identity, transform);
-                tile.GridPosition = new Vector2Int(x, y);
-                return tile;
+                
+                Tile tile = Instantiate(colorMapping.prefab, spawnPosition * _distanceBetweenTiles, Quaternion.identity, transform);
+                _tiles.Add(tile);
+                
+                GridTile gridTile = new GridTile();
+                gridTile.SetItem(x, y, tile.CurrentTileType);
+                return gridTile;
             }
         }
 

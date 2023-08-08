@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridController
+public class GridTiles : IGrid<GridTile>
 {
     private GridTile[,] _grid;
 
@@ -10,12 +10,12 @@ public class GridController
     
     public IReadOnlyDictionary<GridTile.TileType, List<GridTile>> GridTilesDictionary => _gridTilesDictionary;
 
-    public GridController()
+    public GridTiles()
     {
         _gridTilesDictionary = new Dictionary<GridTile.TileType, List<GridTile>>();
     }
     
-    public void SetGrid(int gridSizeX, int gridSizeY, List<GridTile> gridTiles)
+    public void ResetGrid(int gridSizeX, int gridSizeY)
     {
         _grid = new GridTile[gridSizeX, gridSizeY];
         _gridTilesDictionary.Clear();
@@ -23,12 +23,17 @@ public class GridController
         _gridTilesDictionary.Add(GridTile.TileType.DeathTile, new List<GridTile>());
         _gridTilesDictionary.Add(GridTile.TileType.SpawnTile, new List<GridTile>());
         _gridTilesDictionary.Add(GridTile.TileType.WalkingTile, new List<GridTile>());
+    }
+
+    public void SetGridObjects(IReadOnlyList<GridTile> gridTiles)
+    {
+        Debug.Log("Count" + gridTiles.Count);
         
-        foreach (GridTile tile in gridTiles)
+        foreach (GridTile gridTile in gridTiles)
         {
-            _grid[tile.GridPosition.x, tile.GridPosition.y] = tile;
-            
-            _gridTilesDictionary[tile.CurrentTileType].Add(tile);
+            _grid[gridTile.X, gridTile.Y] = gridTile;
+
+            _gridTilesDictionary[gridTile.CurrentTileType].Add(gridTile);
         }
     }
 
@@ -40,17 +45,6 @@ public class GridController
         if (x < 0 || x >= _grid.GetLength(0) || y < 0 || y >= _grid.GetLength(1))
             return null;
         
-        return _grid[x, y];
-    }
-
-    public GridTile GetRandomTile()
-    {
-        if (_grid == null)
-            return null;
-        
-        int x = Random.Range(0, _grid.GetLength(0));
-        int y = Random.Range(0, _grid.GetLength(1));
-
         return _grid[x, y];
     }
 
@@ -77,4 +71,5 @@ public class GridController
         
         return walkableTiles[randomNumber];
     }
+    
 }

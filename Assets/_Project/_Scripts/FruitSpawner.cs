@@ -5,38 +5,27 @@ using UnityEngine;
 
 public class FruitSpawner : MonoBehaviour
 {
-    [SerializeField] private Fruit _fruitPf;
+    [SerializeField] private Transform _fruitPf;
 
-    private GridController _gridController;
+    private GridItems _gridItems;
+    private GridTiles _gridTiles;
     private float _distanceBetweenTiles;
     
-    public void Initialize(GridController gridController, float distanceBetweenTiles)
+    public void Initialize(GridItems gridItems, GridTiles gridTiles , float distanceBetweenTiles)
     {
-        _gridController = gridController;
+        _gridItems = gridItems;
+        _gridTiles = gridTiles;
         _distanceBetweenTiles = distanceBetweenTiles;
     }
     
     public void SpawnFruit()
     {
-        GridTile tile = _gridController.GetRandomWalkableTile();
-        Vector3 spawnPos = new Vector3(tile.GridPosition.x, 0, tile.GridPosition.y) * _distanceBetweenTiles + Vector3.up;
+        GridTile tile = _gridTiles.GetRandomWalkableTile();
+        
+        if (tile == null) 
+            throw new Exception("Walkable Tile Wasn't found");
+        
+        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _distanceBetweenTiles + Vector3.up;
         Instantiate(_fruitPf, spawnPos, Quaternion.identity);
-    }
-
-    private void OnEnable()
-    {
-        Fruit.OnPlayerTriggerEnter+=FruitOnOnPlayerTriggerEnter;
-    }
-
-    private void FruitOnOnPlayerTriggerEnter(object sender, EventArgs e)
-    {
-        Fruit fruit = sender as Fruit;
-        Destroy(fruit.gameObject);
-        SpawnFruit();
-    }
-
-    private void OnDisable()
-    {
-        Fruit.OnPlayerTriggerEnter-=FruitOnOnPlayerTriggerEnter;
     }
 }

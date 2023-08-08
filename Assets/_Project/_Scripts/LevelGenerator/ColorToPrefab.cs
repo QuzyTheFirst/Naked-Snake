@@ -6,5 +6,5 @@ public class ColorToPrefab
 {
     public string name;
     public Color color;
-    public GridTile prefab;
+    public Tile prefab;
 }

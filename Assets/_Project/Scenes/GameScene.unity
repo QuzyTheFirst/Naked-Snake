@@ -383,7 +383,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17ae263d3a5b67f4f9dba42b66049eb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fruitPf: {fileID: 2749281546091979995, guid: e0c58b959a3bf3c4db285beb90d7760f,
+  _fruitPf: {fileID: 1713437852678840457, guid: e0c58b959a3bf3c4db285beb90d7760f,
     type: 3}
 --- !u!4 &789505812
 Transform:
@@ -724,15 +724,15 @@ MonoBehaviour:
   colorMappings:
   - name: GridEndTile
     color: {r: 1, g: 0, b: 0, a: 1}
-    prefab: {fileID: 5826533083117204441, guid: 27f13cd8aaeb8ca4892cb3549030a294,
+    prefab: {fileID: 8718398346120520500, guid: 27f13cd8aaeb8ca4892cb3549030a294,
       type: 3}
   - name: GridTile
     color: {r: 1, g: 1, b: 1, a: 1}
-    prefab: {fileID: 2447950267014049146, guid: 0edb2045e30e5da4fa22d81392cc6b37,
+    prefab: {fileID: 8940908264832981098, guid: 0edb2045e30e5da4fa22d81392cc6b37,
       type: 3}
   - name: GridSpawnTile
     color: {r: 0, g: 1, b: 0, a: 1}
-    prefab: {fileID: 5826533083117204441, guid: 0c941b43eaa4df9479452841be83c08b,
+    prefab: {fileID: 6132050453846784989, guid: 0c941b43eaa4df9479452841be83c08b,
       type: 3}
   _distanceBetweenTiles: 1.2
 --- !u!4 &2070890402
