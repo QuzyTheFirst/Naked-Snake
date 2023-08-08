@@ -6,6 +6,7 @@ using UnityEngine;
 public class FruitSpawner : MonoBehaviour
 {
     [SerializeField] private Transform _fruitPf;
+    [SerializeField] private int _amountOfTriesToFindRightTile = 5;
 
     private GridsManipulator _gridsManipulator;
     private float _distanceBetweenTiles;
@@ -20,8 +21,17 @@ public class FruitSpawner : MonoBehaviour
     
     public void SpawnFruit()
     {
-        GridTile tile = _gridsManipulator.GridTiles.GetRandomWalkableTile();
+        GridTile tile = null;
         
+        for (int i = 0; i < _amountOfTriesToFindRightTile; i++)
+        {
+            Debug.Log("Amount of tries " + i);
+            tile = _gridsManipulator.GridTiles.GetRandomWalkableTile();
+            
+            if (_gridsManipulator.CheckTileForSnake(tile.X, tile.Y) == false)
+                break;
+        }
+
         if (tile == null) 
             throw new Exception("Walkable Tile Wasn't found");
         

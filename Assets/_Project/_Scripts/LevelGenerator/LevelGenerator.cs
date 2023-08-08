@@ -1,21 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class LevelGenerator : MonoBehaviour
 {
+    private static float _distanceBetweenTiles = 1.2f;
+    
     [SerializeField] private Texture2D _map;
 
     [SerializeField] private ColorToPrefab[] colorMappings;
-    
-    [SerializeField] private float _distanceBetweenTiles = 1.2f;
-    
+
     private List<GridTile> _gridTiles;
     private List<Tile> _tiles;
 
-    public float DistanceBetweenTiles => _distanceBetweenTiles;
+    public static float DistanceBetweenTiles => _distanceBetweenTiles;
     public Vector2Int GridSize => new Vector2Int(_map.width, _map.height);
     public IReadOnlyList<GridTile> GridTiles => _gridTiles;
     

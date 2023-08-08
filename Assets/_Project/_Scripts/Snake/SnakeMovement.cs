@@ -14,6 +14,7 @@ using Vector3 = UnityEngine.Vector3;
 public class SnakeMovement : PlayerInputHandler
 {
     public static event EventHandler<Vector2Int> OnSnakeHitFruit;
+    public static event EventHandler<GridTile> OnSnakeMoved;
     
     enum MovementDirection
     {
@@ -39,11 +40,15 @@ public class SnakeMovement : PlayerInputHandler
     private GridTile _currentGridTile;
     private float _distanceBetweenTiles;
 
+    private SnakeBodyController _snakeBodyController;
+
     public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, float distanceBetweenTiles)
     {
         _gridsManipulator = gridsManipulator;
         _currentGridTile = gridTile;
         _distanceBetweenTiles = distanceBetweenTiles;
+
+        _snakeBodyController = GetComponent<SnakeBodyController>();
     }
 
     public async void StartMoving()
@@ -62,7 +67,10 @@ public class SnakeMovement : PlayerInputHandler
                 continue;
             }
             
+            OnSnakeMoved?.Invoke(this, _currentGridTile);
+            
             _currentGridTile = nextTile;
+            
             
             // Changing Snake Position
             UpdateSnakeGridPosition();
@@ -90,9 +98,21 @@ public class SnakeMovement : PlayerInputHandler
     private void UpdateSnakeGridPosition()
     {
         _gridsManipulator.GridSnakes.ResetGrid();
-        GridIntItem item = new GridIntItem();
-        item.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
-        _gridsManipulator.GridSnakes.TrySetTile(item);
+        
+        GridIntItem snake = new GridIntItem();
+        snake.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
+        _gridsManipulator.GridSnakes.TrySetTile(snake);
+        
+        Debug.Log("Head new grid pos: " + snake.X + " | " + snake.Y);
+
+        foreach (SnakeBody snakeBody in _snakeBodyController.SpawnedSnakeBodies)
+        {
+            GridIntItem body = new GridIntItem();
+            body.SetItem(snakeBody.GridPosition.x, snakeBody.GridPosition.y, 1);
+            _gridsManipulator.GridSnakes.TrySetTile(body);
+            
+            Debug.Log("Body new grid pos: " + body.X + " | " + body.Y);
+        }
     }
 
     private Vector2Int Get2DMovementDirection()
@@ -117,7 +137,7 @@ public class SnakeMovement : PlayerInputHandler
         }
     }
 
-    private MovementDirection GetOposingMovementDirection(MovementDirection direction)
+    private MovementDirection GetOpposingMovementDirection(MovementDirection direction)
     {
         switch (direction)
         {
@@ -150,7 +170,7 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnRightPressed(object sender, EventArgs e)
     {
-        if (MovementDirection.Right == GetOposingMovementDirection(_lastStepMoveDir))
+        if (MovementDirection.Right == GetOpposingMovementDirection(_lastStepMoveDir))
             return;
 
         _movementDirection = MovementDirection.Right;
@@ -159,7 +179,7 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnLeftPressed(object sender, EventArgs e)
     {
-        if (MovementDirection.Left == GetOposingMovementDirection(_lastStepMoveDir))
+        if (MovementDirection.Left == GetOpposingMovementDirection(_lastStepMoveDir))
             return;
 
         _movementDirection = MovementDirection.Left;
@@ -168,7 +188,7 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnDownPressed(object sender, EventArgs e)
     {
-        if (MovementDirection.Down == GetOposingMovementDirection(_lastStepMoveDir))
+        if (MovementDirection.Down == GetOpposingMovementDirection(_lastStepMoveDir))
             return;
         
         _movementDirection = MovementDirection.Down;
@@ -177,7 +197,7 @@ public class SnakeMovement : PlayerInputHandler
 
     private void SnakeHead_OnUpPressed(object sender, EventArgs e)
     {
-        if (MovementDirection.Up == GetOposingMovementDirection(_lastStepMoveDir))
+        if (MovementDirection.Up == GetOpposingMovementDirection(_lastStepMoveDir))
             return;
 
         _movementDirection = MovementDirection.Up;
