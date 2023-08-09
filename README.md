@@ -1,2 +1,2 @@
 # Naked Snake
- My First Game Remaster
+ Remaster of my first game (https://quzix.itch.io/snake-is-nake)
