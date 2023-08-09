@@ -11,8 +11,8 @@ public class GameEntryPoint : MonoBehaviour
     [SerializeField] private LevelGenerator _levelGenerator;
     [SerializeField] private GameStateController _gameStateController;
     [SerializeField] private FruitSpawner _fruitSpawner;
-
-    [SerializeField] private SnakeMovement snake;
+    [SerializeField] private LevelChanger levelChanger;
+    [SerializeField] private CameraController _cameraController;
 
     private GridTiles _gridTiles;
     private GridItems _gridItems;
@@ -27,29 +27,13 @@ public class GameEntryPoint : MonoBehaviour
         _gridSnakes = new GridSnakes();
         _gridsManipulator = new GridsManipulator(_gridTiles, _gridSnakes, _gridItems);
         
+        levelChanger.Initialize(_gridsManipulator, _levelGenerator, _fruitSpawner, _sceneController, _cameraController, _inGameUI);
         _inGameUI.Initialize(_sceneController, _gameStateController);
         _gameStateController.Initialize(_inGameUI);
         _fruitSpawner.Initialize(_gridsManipulator, LevelGenerator.DistanceBetweenTiles);
         
-        // Setting Up Level
-        _levelGenerator.GenerateLevel();
-        
-        _gridTiles.SetGridSize(_levelGenerator.GridSize.x, _levelGenerator.GridSize.y);
-        _gridTiles.SetGridTiles(_levelGenerator.GridTiles);
-        
-        _gridItems.SetGridSize(_levelGenerator.GridSize.x, _levelGenerator.GridSize.y);
-        
-        _gridSnakes.SetGridSize(_levelGenerator.GridSize.x, _levelGenerator.GridSize.y);
-        
-        _fruitSpawner.SpawnFruit();
-        
-        // Spawning Snake
-        GridTile tile = _gridTiles.GetRandomSpawnTile();
-        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-        SnakeMovement snakeMovement = Instantiate(snake, spawnPos, Quaternion.identity);
-        snakeMovement.Initialize(_gridsManipulator, tile, LevelGenerator.DistanceBetweenTiles);
-        
-        // Let Snake Go Wild
-        snakeMovement.StartMoving();
+        // Setting Up Level or going to end menu
+        if(levelChanger.TryChangeLevel(0) == false)
+            _sceneController.LoadNextScene();
     }
 }

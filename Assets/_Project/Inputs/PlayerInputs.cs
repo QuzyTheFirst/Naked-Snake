@@ -62,6 +62,15 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SPEEDBOOST"",
+                    ""type"": ""Button"",
+                    ""id"": ""ab88e4b3-c4b2-43a4-8382-ac476fe9e153"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -196,6 +205,28 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                     ""action"": ""LEFT"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e45ee3b7-a028-4a26-839a-8d7019d210f7"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""SPEEDBOOST"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b22d0fc4-2afb-4861-9160-0759427e3047"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""SPEEDBOOST"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -231,6 +262,7 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         m_Map_DOWN = m_Map.FindAction("DOWN", throwIfNotFound: true);
         m_Map_RIGHT = m_Map.FindAction("RIGHT", throwIfNotFound: true);
         m_Map_LEFT = m_Map.FindAction("LEFT", throwIfNotFound: true);
+        m_Map_SPEEDBOOST = m_Map.FindAction("SPEEDBOOST", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -294,6 +326,7 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Map_DOWN;
     private readonly InputAction m_Map_RIGHT;
     private readonly InputAction m_Map_LEFT;
+    private readonly InputAction m_Map_SPEEDBOOST;
     public struct MapActions
     {
         private @PlayerInputs m_Wrapper;
@@ -302,6 +335,7 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         public InputAction @DOWN => m_Wrapper.m_Map_DOWN;
         public InputAction @RIGHT => m_Wrapper.m_Map_RIGHT;
         public InputAction @LEFT => m_Wrapper.m_Map_LEFT;
+        public InputAction @SPEEDBOOST => m_Wrapper.m_Map_SPEEDBOOST;
         public InputActionMap Get() { return m_Wrapper.m_Map; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -323,6 +357,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                 @LEFT.started -= m_Wrapper.m_MapActionsCallbackInterface.OnLEFT;
                 @LEFT.performed -= m_Wrapper.m_MapActionsCallbackInterface.OnLEFT;
                 @LEFT.canceled -= m_Wrapper.m_MapActionsCallbackInterface.OnLEFT;
+                @SPEEDBOOST.started -= m_Wrapper.m_MapActionsCallbackInterface.OnSPEEDBOOST;
+                @SPEEDBOOST.performed -= m_Wrapper.m_MapActionsCallbackInterface.OnSPEEDBOOST;
+                @SPEEDBOOST.canceled -= m_Wrapper.m_MapActionsCallbackInterface.OnSPEEDBOOST;
             }
             m_Wrapper.m_MapActionsCallbackInterface = instance;
             if (instance != null)
@@ -339,6 +376,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                 @LEFT.started += instance.OnLEFT;
                 @LEFT.performed += instance.OnLEFT;
                 @LEFT.canceled += instance.OnLEFT;
+                @SPEEDBOOST.started += instance.OnSPEEDBOOST;
+                @SPEEDBOOST.performed += instance.OnSPEEDBOOST;
+                @SPEEDBOOST.canceled += instance.OnSPEEDBOOST;
             }
         }
     }
@@ -367,5 +407,6 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         void OnDOWN(InputAction.CallbackContext context);
         void OnRIGHT(InputAction.CallbackContext context);
         void OnLEFT(InputAction.CallbackContext context);
+        void OnSPEEDBOOST(InputAction.CallbackContext context);
     }
 }

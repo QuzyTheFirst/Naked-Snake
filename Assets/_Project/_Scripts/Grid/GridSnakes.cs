@@ -9,6 +9,8 @@ public class GridSnakes : IGrid<GridIntItem>
     private int _gridSizeX;
     private int _gridSizeY;
 
+    public Vector2Int GridSize => new Vector2Int(_gridSizeX, _gridSizeY);
+    
     public void ResetGrid()
     {
         _grid = new GridIntItem[_gridSizeX, _gridSizeY];

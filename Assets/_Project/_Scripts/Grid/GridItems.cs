@@ -10,6 +10,8 @@ public class GridItems : IGrid<GridTransformItem>
     private int _gridSizeX;
     private int _gridSizeY;
     
+    public Vector2Int GridSize => new Vector2Int(_gridSizeX, _gridSizeY);
+    
     public void ResetGrid()
     {
         _grid = new GridTransformItem[_gridSizeX, _gridSizeY];

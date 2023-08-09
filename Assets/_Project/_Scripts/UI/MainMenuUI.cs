@@ -15,12 +15,12 @@ public class MainMenuUI : MonoBehaviour
     
     public void StartGameBtn()
     {
-        _sceneController.LoadNextLevel();
+        _sceneController.LoadNextScene();
     }
 
     public void LoadLevelBtn(int levelID)
     {
-        _sceneController.LoadLevel(levelID);
+        _sceneController.LoadScene(levelID);
     }
     
     public void ExitGameBtn()

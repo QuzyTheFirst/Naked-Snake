@@ -8,29 +8,32 @@ using UnityEngine.Serialization;
 public class LevelGenerator : MonoBehaviour
 {
     private static float _distanceBetweenTiles = 1.2f;
-    
-    [SerializeField] private Texture2D _map;
 
     [SerializeField] private ColorToPrefab[] colorMappings;
 
     private List<GridTile> _gridTiles;
     private List<Tile> _tiles;
 
+    private int _generatedMapWidth;
+    private int _generatedMapHeight;
+    
     public static float DistanceBetweenTiles => _distanceBetweenTiles;
-    public Vector2Int GridSize => new Vector2Int(_map.width, _map.height);
+    public Vector2Int GeneratedGridSize => new Vector2Int(_generatedMapWidth, _generatedMapHeight);
     public IReadOnlyList<GridTile> GridTiles => _gridTiles;
     
 
-    public void GenerateLevel()
+    public void GenerateLevel(Texture2D map)
     {
-        _gridTiles = new List<GridTile>();
-        _tiles = new List<Tile>();
+        ClearLevel();
 
-        for (int x = 0; x < _map.width; x++)
+        _generatedMapWidth = map.width;
+        _generatedMapHeight = map.height;
+
+        for (int x = 0; x < map.width; x++)
         {
-            for (int y = 0; y < _map.height; y++)
+            for (int y = 0; y < map.height; y++)
             {
-                GridTile tile = GenerateTile(x, y);
+                GridTile tile = GenerateTile(x, y, map);
                 
                 if (tile == null)
                     continue;
@@ -40,9 +43,27 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    private GridTile GenerateTile(int x, int y)
+    private void ClearLevel()
     {
-        Color pixelColor = _map.GetPixel(x, y);
+        _gridTiles = new List<GridTile>();
+
+        if (_tiles != null)
+        {
+            foreach (Tile tile in _tiles)
+            {
+                Destroy(tile.gameObject);
+            }
+        }
+
+        _tiles = new List<Tile>();
+
+        _generatedMapHeight = 0;
+        _generatedMapWidth = 0;
+    }
+    
+    private GridTile GenerateTile(int x, int y, Texture2D map)
+    {
+        Color pixelColor = map.GetPixel(x, y);
         
         if (pixelColor.a == 0)
             return null;

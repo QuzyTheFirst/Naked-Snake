@@ -34,6 +34,32 @@ public class GridsManipulator
         _gridSnakes.SetGridSize(gridSizeX, gridSizeY);
         _gridItems.SetGridSize(gridSizeX, gridSizeY);
     }
+
+    public List<GridTile> FindAllWalkableTilesWithoutSnakesAndFruits()
+    {
+        List<GridTile> gridTiles = new List<GridTile>();
+
+        for (int x = 0; x < _gridTiles.GridSize.x; x++)
+        {
+            for (int y = 0; y < _gridTiles.GridSize.y; y++)
+            {
+                GridTile tile = _gridTiles.TryGetTile(x, y);
+                
+                if(tile == null)
+                    continue;
+
+                if (!CheckTileForSnake(x, y) && 
+                    !CheckTileForFruit(x, y) &&
+                    tile.CurrentTileType == GridTile.TileType.WalkingTile)
+                {
+                    gridTiles.Add(tile);
+                }
+                    
+            }
+        }
+        
+        return gridTiles;
+    }
     
     public bool CheckTileForSnake(int x, int y)
     {

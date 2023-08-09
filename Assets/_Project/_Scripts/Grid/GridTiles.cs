@@ -13,6 +13,8 @@ public class GridTiles : IGrid<GridTile>
     
     public IReadOnlyDictionary<GridTile.TileType, List<GridTile>> GridTilesDictionary => _gridTilesDictionary;
 
+    public Vector2Int GridSize => new Vector2Int(_gridSizeX, _gridSizeY);
+    
     public GridTiles()
     {
         _gridTilesDictionary = new Dictionary<GridTile.TileType, List<GridTile>>();
@@ -105,4 +107,5 @@ public class GridTiles : IGrid<GridTile>
         
         return walkableTiles[randomNumber];
     }
+    
 }

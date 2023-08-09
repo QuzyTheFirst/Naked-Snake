@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,50 +16,84 @@ public class SnakeMovement : PlayerInputHandler
 {
     public static event EventHandler<Vector2Int> OnSnakeHitFruit;
     public static event EventHandler<GridTile> OnSnakeMoved;
-    
+
     enum MovementDirection
     {
-        Up, 
-        Down, 
-        Left, 
+        Up,
+        Down,
+        Left,
         Right
     }
+
     private MovementDirection _movementDirection = MovementDirection.Up;
     private MovementDirection _lastStepMoveDir;
 
     public enum SnakeState
     {
-        Alive, 
+        Alive,
         Dead
     }
+
     private SnakeState _snakeState = SnakeState.Alive;
 
-    [SerializeField] private int _moveEach_ms = 500;
-    private float _moveTimer;
+    [SerializeField] private int _normalMoveEach_ms = 500;
+    [SerializeField] private int _boostMoveEach_ms = 250;
+    private int _currentMoveEach_ms;
 
     private GridsManipulator _gridsManipulator;
     private GridTile _currentGridTile;
-    private float _distanceBetweenTiles;
+    private Transform _snakeParent;
+    private InGameUI _inGameUI;
 
     private SnakeBodyController _snakeBodyController;
 
-    public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, float distanceBetweenTiles)
+    private CancellationTokenSource _snakeCTS;
+
+    public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, Transform snakeParent, InGameUI inGameUI)
     {
         _gridsManipulator = gridsManipulator;
         _currentGridTile = gridTile;
-        _distanceBetweenTiles = distanceBetweenTiles;
+        _snakeParent = snakeParent;
 
         _snakeBodyController = GetComponent<SnakeBodyController>();
+        _snakeBodyController.Initialize(_snakeParent);
+
+        _inGameUI = inGameUI;
+
+        _currentMoveEach_ms = _normalMoveEach_ms;
     }
 
     public async void StartMoving()
     {
+        if (_snakeCTS == null)
+            _snakeCTS = new CancellationTokenSource();
+
+        try
+        {
+            await MoveSnake(_snakeCTS.Token);
+        }
+        catch (TaskCanceledException ex)
+        {
+            Debug.Log("Snake Canceled");
+        }
+        finally
+        {
+            _snakeCTS = null;
+        }
+        
+        Debug.Log("Snake is dead");
+    }
+
+    private async Task MoveSnake(CancellationToken token)
+    {
         while (_snakeState == SnakeState.Alive)
         {
-            await Task.Delay(_moveEach_ms);
-            
+            _inGameUI.StartProgressBarAnimation((float)_currentMoveEach_ms / 1000f);
+            await Task.Delay(_currentMoveEach_ms, token);
+
             // Finding Next Tile
-            Vector2Int nextTilePosition = new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
+            Vector2Int nextTilePosition =
+                new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
             GridTile nextTile = _gridsManipulator.GridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);
 
             if (nextTile == null)
@@ -66,52 +101,61 @@ public class SnakeMovement : PlayerInputHandler
                 _snakeState = SnakeState.Dead;
                 continue;
             }
-            
+
             OnSnakeMoved?.Invoke(this, _currentGridTile);
-            
+
             _currentGridTile = nextTile;
-            
-            
+
+
             // Changing Snake Position
             UpdateSnakeGridPosition();
-            
-            Vector3 newSnakePosition = new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * _distanceBetweenTiles + Vector3.up;
+
+            Vector3 newSnakePosition =
+                new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
+                Vector3.up;
             transform.position = newSnakePosition;
 
             _lastStepMoveDir = _movementDirection;
-            
+
             // Check New Tile For Things
             if (_gridsManipulator.CheckTileForFruit(_currentGridTile.X, _currentGridTile.Y))
             {
                 OnSnakeHitFruit?.Invoke(this, new Vector2Int(_currentGridTile.X, _currentGridTile.Y));
             }
-            
+
             if (_currentGridTile.CurrentTileType == GridTile.TileType.DeathTile)
             {
                 _snakeState = SnakeState.Dead;
                 continue;
             }
         }
-        Debug.Log("Snake is dead");
     }
+    
+    public void CancelMovementAndDestroySnake()
+    {
+        if (_snakeCTS == null)
+            return;
+        _snakeCTS.Cancel();
 
+        foreach (Transform snakePart in _snakeParent)
+        {
+            Destroy(snakePart.gameObject);
+        }
+    }
+    
     private void UpdateSnakeGridPosition()
     {
         _gridsManipulator.GridSnakes.ResetGrid();
-        
+
         GridIntItem snake = new GridIntItem();
         snake.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
         _gridsManipulator.GridSnakes.TrySetTile(snake);
-        
-        Debug.Log("Head new grid pos: " + snake.X + " | " + snake.Y);
 
         foreach (SnakeBody snakeBody in _snakeBodyController.SpawnedSnakeBodies)
         {
             GridIntItem body = new GridIntItem();
             body.SetItem(snakeBody.GridPosition.x, snakeBody.GridPosition.y, 1);
             _gridsManipulator.GridSnakes.TrySetTile(body);
-            
-            Debug.Log("Body new grid pos: " + body.X + " | " + body.Y);
         }
     }
 
@@ -158,7 +202,7 @@ public class SnakeMovement : PlayerInputHandler
                 break;
         }
     }
-    
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -166,6 +210,21 @@ public class SnakeMovement : PlayerInputHandler
         OnDownPressed += SnakeHead_OnDownPressed;
         OnLeftPressed += SnakeHead_OnLeftPressed;
         OnRightPressed += SnakeHead_OnRightPressed;
+        
+        OnBoostButtonPressed += OnOnBoostButtonPressed;
+        OnBoostButtonCanceled += OnOnBoostButtonCanceled;
+    }
+
+    private void OnOnBoostButtonCanceled(object sender, EventArgs e)
+    {
+        _inGameUI.ToggleShiftText(false);
+        _currentMoveEach_ms = _normalMoveEach_ms;
+    }
+
+    private void OnOnBoostButtonPressed(object sender, EventArgs e)
+    {
+        _inGameUI.ToggleShiftText(true);
+        _currentMoveEach_ms = _boostMoveEach_ms;
     }
 
     private void SnakeHead_OnRightPressed(object sender, EventArgs e)
@@ -190,7 +249,7 @@ public class SnakeMovement : PlayerInputHandler
     {
         if (MovementDirection.Down == GetOpposingMovementDirection(_lastStepMoveDir))
             return;
-        
+
         _movementDirection = MovementDirection.Down;
         transform.rotation = Quaternion.LookRotation(Vector3.back);
     }

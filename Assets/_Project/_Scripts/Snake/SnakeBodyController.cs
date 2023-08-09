@@ -10,8 +10,10 @@ public class SnakeBodyController : MonoBehaviour
       private GridTile[] _lastSnakeGridTiles;
       
       private List<SnakeBody> _spawnedSnakeBodies;
+
+      private Transform _snakeParent;
       
-      [SerializeField] private int _amountOfLastPlayerPositionsToSave;
+      private int _amountOfLastPlayerPositionsToSave;
 
 
       public IReadOnlyList<SnakeBody> SpawnedSnakeBodies => _spawnedSnakeBodies;
@@ -24,6 +26,11 @@ public class SnakeBodyController : MonoBehaviour
             _lastSnakeGridTiles = new GridTile[_amountOfLastPlayerPositionsToSave];
       }
 
+      public void Initialize(Transform snakeParent)
+      {
+            _snakeParent = snakeParent;
+      }
+      
       private void PlayerMoved(GridTile from)
       {
             AddLastPositionToArray(from);
@@ -48,18 +55,18 @@ public class SnakeBodyController : MonoBehaviour
                   SnakeBody body = _spawnedSnakeBodies[i];
                   GridTile tile = _lastSnakeGridTiles[i];
                   
-                  body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles;
+                  body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
                   body.SetGridPosition(tile.X,tile.Y);
             }
       } 
       
       private void SpawnNewBody()
       {
-            Transform body = Instantiate(_snakeBodyPf);
+            Transform body = Instantiate(_snakeBodyPf, _snakeParent);
             GridTile tile = _lastSnakeGridTiles[_lastSnakeGridTiles.Length - 1];
             SnakeBody snakeBody = new SnakeBody(tile.X, tile.Y, body);
             body.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-            
+
             _spawnedSnakeBodies.Add(snakeBody);
             _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
             UpdateSavedPositionsCapacity();
@@ -78,11 +85,11 @@ public class SnakeBodyController : MonoBehaviour
 
       private void OnEnable()
       {
-            FruitSpawner.OnFruitEaten += FruitSpawner_OnFruitEaten;
+            FruitsCollector.FruitSuccessfullyEaten += FruitsCollectorOnFruitSuccessfullyEaten;
             SnakeMovement.OnSnakeMoved += SnakeMovement_OnSnakeMoved;
       }
 
-      private void FruitSpawner_OnFruitEaten(object sender, EventArgs e)
+      private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int position)
       {
             SpawnNewBody();
       }
@@ -94,7 +101,7 @@ public class SnakeBodyController : MonoBehaviour
       
       private void OnDisable()
       {
-            FruitSpawner.OnFruitEaten -= FruitSpawner_OnFruitEaten;
+            FruitsCollector.FruitSuccessfullyEaten -= FruitsCollectorOnFruitSuccessfullyEaten;
             SnakeMovement.OnSnakeMoved -= SnakeMovement_OnSnakeMoved;
       }
 }
