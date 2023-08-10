@@ -17,6 +17,7 @@ public class SnakeBodyController : MonoBehaviour
 
     private int _amountOfLastPlayerPositionsToSave;
 
+    private Vector3 _standardSnakeBodySize;
 
     public IReadOnlyList<SnakeBody> SpawnedSnakeBodies => _spawnedSnakeBodies;
 
@@ -30,6 +31,8 @@ public class SnakeBodyController : MonoBehaviour
         _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
 
         _lastSnakeGridTiles = new GridTile[_amountOfLastPlayerPositionsToSave];
+
+        _standardSnakeBodySize = _snakeBodyPf.localScale;
     }
 
     private void PlayerMoved(GridTile from, GridTile to)
@@ -58,7 +61,9 @@ public class SnakeBodyController : MonoBehaviour
             SnakeBody body = _spawnedSnakeBodies[i];
             GridTile tile = _lastSnakeGridTiles[i];
 
-            body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            //body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
             body.SetGridPosition(tile.X, tile.Y);
         }
 
@@ -79,8 +84,21 @@ public class SnakeBodyController : MonoBehaviour
         UpdateSnakeBodiesGridPositions();
         RotateSnakeBodies();
         UpdateSavedPositionsCapacity();
+        ResizeSnakeBodies();
     }
 
+    private void ResizeSnakeBodies()
+    {
+        for (int i = _spawnedSnakeBodies.Count - 1; i >= 0; i--)
+        {
+            SnakeBody body = _spawnedSnakeBodies[i];
+            
+            float scaleValue = Mathf.InverseLerp(_spawnedSnakeBodies.Count, _spawnedSnakeBodies.Count - 3, i);
+
+            body.Transform.localScale = _standardSnakeBodySize * scaleValue;
+        }
+    }
+    
     private void RotateSnakeBodies()
     {
         for (int i = 0; i < _spawnedSnakeBodies.Count; i++)
@@ -109,7 +127,7 @@ public class SnakeBodyController : MonoBehaviour
             }
             else
             {
-                Vector3 worldLookRotationVector = new Vector3(directionFromPreviousToNextBody.x, 0,
+                Vector3 worldLookRotationVector = new Vector3(-directionFromPreviousToNextBody.x, 0,
                     directionFromPreviousToNextBody.y);
                 body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }
@@ -139,7 +157,7 @@ public class SnakeBodyController : MonoBehaviour
             }
             else
             {
-                Vector3 worldLookRotationVector = new Vector3(directionFromPreviousToNextBody.x, 0,
+                Vector3 worldLookRotationVector = new Vector3(-directionFromPreviousToNextBody.x, 0,
                     directionFromPreviousToNextBody.y);
                 body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }

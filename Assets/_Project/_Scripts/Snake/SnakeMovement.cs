@@ -54,6 +54,9 @@ public class SnakeMovement : PlayerInputHandler
     private SnakeBodyController _snakeBodyController;
 
     private CancellationTokenSource _snakeCTS;
+    
+    private static float _leanTweenTransitionTime = .1f;
+    public static float LeanTweenTransitionTime => _leanTweenTransitionTime;
 
     public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, Transform snakeParent, InGameUI inGameUI)
     {
@@ -94,7 +97,7 @@ public class SnakeMovement : PlayerInputHandler
     {
         while (_snakeState == SnakeState.Alive)
         {
-            _inGameUI.StartProgressBarAnimation((float)_currentMoveEach_ms / 1000f);
+            _inGameUI.StartProgressBarAnimation((float)_currentMoveEach_ms * .001f);
             await Task.Delay(_currentMoveEach_ms, token);
 
             // Finding Next Tile
@@ -109,12 +112,7 @@ public class SnakeMovement : PlayerInputHandler
                 _snakeState = SnakeState.Dead;
                 continue;
             }
-
-            if (_gridsManipulator.CheckTileForSnake(nextTile.X, nextTile.Y))
-            {
-                _snakeState = SnakeState.Dead;
-            }
-
+            
 
             _currentGridTile = nextTile;
 
@@ -122,18 +120,29 @@ public class SnakeMovement : PlayerInputHandler
             // Changing Snake Position
             _gridsManipulator.GridSnakes.ResetGrid();
             
-            UpdateSnakeGridPosition();
-            
+            // Shit started (dont touch)
+            // Updates snake body first
             OnSnakeMoved?.Invoke(this, new SnakeMoveData()
                 {
                     CurrentTile = nextTile,
                     PreviousTile = oldTile
                 });
             
+            //Check if next tile has a snake
+            if (_gridsManipulator.CheckTileForSnake(nextTile.X, nextTile.Y))
+            {
+                _snakeState = SnakeState.Dead;
+            }
+            
+            //Update Snake Head
+            UpdateSnakeGridPosition();
+            // Shit Ending
+            
             Vector3 newSnakePosition =
                 new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
                 Vector3.up;
-            transform.position = newSnakePosition;
+            //transform.position = newSnakePosition;
+            LeanTween.move(gameObject, newSnakePosition, _leanTweenTransitionTime);
 
             _lastStepMoveDir = _movementDirection;
 
