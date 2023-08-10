@@ -12,10 +12,16 @@ using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
+public struct SnakeMoveData
+{
+    public GridTile PreviousTile;
+    public GridTile CurrentTile;
+}
+
 public class SnakeMovement : PlayerInputHandler
 {
     public static event EventHandler<Vector2Int> OnSnakeHitFruit;
-    public static event EventHandler<GridTile> OnSnakeMoved;
+    public static event EventHandler<SnakeMoveData> OnSnakeMoved;
 
     enum MovementDirection
     {
@@ -56,7 +62,7 @@ public class SnakeMovement : PlayerInputHandler
         _snakeParent = snakeParent;
 
         _snakeBodyController = GetComponent<SnakeBodyController>();
-        _snakeBodyController.Initialize(_snakeParent);
+        _snakeBodyController.Initialize(_snakeParent, _gridsManipulator, _currentGridTile);
 
         _inGameUI = inGameUI;
 
@@ -94,22 +100,36 @@ public class SnakeMovement : PlayerInputHandler
             // Finding Next Tile
             Vector2Int nextTilePosition =
                 new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
+            
             GridTile nextTile = _gridsManipulator.GridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);
-
+            GridTile oldTile = _currentGridTile;
+            
             if (nextTile == null)
             {
                 _snakeState = SnakeState.Dead;
                 continue;
             }
 
-            OnSnakeMoved?.Invoke(this, _currentGridTile);
+            if (_gridsManipulator.CheckTileForSnake(nextTile.X, nextTile.Y))
+            {
+                _snakeState = SnakeState.Dead;
+            }
+
 
             _currentGridTile = nextTile;
 
 
             // Changing Snake Position
+            _gridsManipulator.GridSnakes.ResetGrid();
+            
             UpdateSnakeGridPosition();
-
+            
+            OnSnakeMoved?.Invoke(this, new SnakeMoveData()
+                {
+                    CurrentTile = nextTile,
+                    PreviousTile = oldTile
+                });
+            
             Vector3 newSnakePosition =
                 new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
                 Vector3.up;
@@ -145,18 +165,9 @@ public class SnakeMovement : PlayerInputHandler
     
     private void UpdateSnakeGridPosition()
     {
-        _gridsManipulator.GridSnakes.ResetGrid();
-
         GridIntItem snake = new GridIntItem();
         snake.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
         _gridsManipulator.GridSnakes.TrySetTile(snake);
-
-        foreach (SnakeBody snakeBody in _snakeBodyController.SpawnedSnakeBodies)
-        {
-            GridIntItem body = new GridIntItem();
-            body.SetItem(snakeBody.GridPosition.x, snakeBody.GridPosition.y, 1);
-            _gridsManipulator.GridSnakes.TrySetTile(body);
-        }
     }
 
     private Vector2Int Get2DMovementDirection()

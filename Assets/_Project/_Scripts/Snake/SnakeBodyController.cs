@@ -5,103 +5,197 @@ using UnityEngine;
 
 public class SnakeBodyController : MonoBehaviour
 {
-      [SerializeField] private Transform _snakeBodyPf;
+    [SerializeField] private Transform _snakeBodyPf;
 
-      private GridTile[] _lastSnakeGridTiles;
-      
-      private List<SnakeBody> _spawnedSnakeBodies;
+    private GridTile[] _lastSnakeGridTiles;
 
-      private Transform _snakeParent;
-      
-      private int _amountOfLastPlayerPositionsToSave;
+    private List<SnakeBody> _spawnedSnakeBodies;
+
+    private Transform _snakeParent;
+    private GridsManipulator _gridsManipulator;
+    private GridTile _snakeHeadGridTile;
+
+    private int _amountOfLastPlayerPositionsToSave;
 
 
-      public IReadOnlyList<SnakeBody> SpawnedSnakeBodies => _spawnedSnakeBodies;
+    public IReadOnlyList<SnakeBody> SpawnedSnakeBodies => _spawnedSnakeBodies;
 
-      private void Awake()
-      {
-            _spawnedSnakeBodies = new List<SnakeBody>();
-            _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
-            
-            _lastSnakeGridTiles = new GridTile[_amountOfLastPlayerPositionsToSave];
-      }
+    public void Initialize(Transform snakeParent, GridsManipulator gridsManipulator, GridTile snakeHeadGridTile)
+    {
+        _snakeParent = snakeParent;
+        _gridsManipulator = gridsManipulator;
+        _snakeHeadGridTile = snakeHeadGridTile;
 
-      public void Initialize(Transform snakeParent)
-      {
-            _snakeParent = snakeParent;
-      }
-      
-      private void PlayerMoved(GridTile from)
-      {
-            AddLastPositionToArray(from);
-            
-            MoveSnakeBodies();
-      }
+        _spawnedSnakeBodies = new List<SnakeBody>();
+        _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
 
-      private void AddLastPositionToArray(GridTile tile)
-      {
-            for (int i = _lastSnakeGridTiles.Length - 2; i >= 0; i--)
+        _lastSnakeGridTiles = new GridTile[_amountOfLastPlayerPositionsToSave];
+    }
+
+    private void PlayerMoved(GridTile from, GridTile to)
+    {
+        _snakeHeadGridTile = to;
+
+        AddLastPositionToArray(from);
+
+        MoveSnakeBodies();
+    }
+
+    private void AddLastPositionToArray(GridTile tile)
+    {
+        for (int i = _lastSnakeGridTiles.Length - 2; i >= 0; i--)
+        {
+            _lastSnakeGridTiles[i + 1] = _lastSnakeGridTiles[i];
+        }
+
+        _lastSnakeGridTiles[0] = tile;
+    }
+
+    private void MoveSnakeBodies()
+    {
+        for (int i = 0; i < _spawnedSnakeBodies.Count; i++)
+        {
+            SnakeBody body = _spawnedSnakeBodies[i];
+            GridTile tile = _lastSnakeGridTiles[i];
+
+            body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            body.SetGridPosition(tile.X, tile.Y);
+        }
+
+        UpdateSnakeBodiesGridPositions();
+        RotateSnakeBodies();
+    }
+
+    private void SpawnNewBody()
+    {
+        Transform body = Instantiate(_snakeBodyPf, _snakeParent);
+        GridTile tile = _lastSnakeGridTiles[_lastSnakeGridTiles.Length - 1];
+        SnakeBody snakeBody = new SnakeBody(tile.X, tile.Y, body);
+        body.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+
+        _spawnedSnakeBodies.Add(snakeBody);
+        _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
+
+        UpdateSnakeBodiesGridPositions();
+        RotateSnakeBodies();
+        UpdateSavedPositionsCapacity();
+    }
+
+    private void RotateSnakeBodies()
+    {
+        for (int i = 0; i < _spawnedSnakeBodies.Count; i++)
+        {
+            SnakeBody previousBody = i - 1 < 0 ? null : _spawnedSnakeBodies[i - 1];
+            SnakeBody body = _spawnedSnakeBodies[i];
+            SnakeBody nextBody = i + 1 >= _spawnedSnakeBodies.Count ? null : _spawnedSnakeBodies[i + 1];
+
+            RotateBody(previousBody, body, nextBody);
+        }
+    }
+
+    private void RotateBody(SnakeBody previousBody, SnakeBody body, SnakeBody nextBody)
+    {
+        if (previousBody != null && nextBody != null)
+        {
+            Vector2 nextBodyDirection = nextBody.GridPosition - body.GridPosition;
+            Vector2 previousBodyDirection = previousBody.GridPosition - body.GridPosition;
+            Vector2 directionFromPreviousToNextBody = nextBodyDirection + previousBodyDirection;
+
+            if (directionFromPreviousToNextBody == Vector2.zero)
             {
-                  _lastSnakeGridTiles[i + 1] = _lastSnakeGridTiles[i];
+                Vector3 worldLookRotationVector =
+                    new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
+                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }
-
-            _lastSnakeGridTiles[0] = tile;
-      }
-      
-      private void MoveSnakeBodies()
-      {
-            for (int i = 0; i < _spawnedSnakeBodies.Count; i++)
+            else
             {
-                  SnakeBody body = _spawnedSnakeBodies[i];
-                  GridTile tile = _lastSnakeGridTiles[i];
-                  
-                  body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-                  body.SetGridPosition(tile.X,tile.Y);
+                Vector3 worldLookRotationVector = new Vector3(directionFromPreviousToNextBody.x, 0,
+                    directionFromPreviousToNextBody.y);
+                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }
-      } 
-      
-      private void SpawnNewBody()
-      {
-            Transform body = Instantiate(_snakeBodyPf, _snakeParent);
-            GridTile tile = _lastSnakeGridTiles[_lastSnakeGridTiles.Length - 1];
-            SnakeBody snakeBody = new SnakeBody(tile.X, tile.Y, body);
-            body.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+        }
 
-            _spawnedSnakeBodies.Add(snakeBody);
-            _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
-            UpdateSavedPositionsCapacity();
-      }
+        if (previousBody != null && nextBody == null)
+        {
+            Vector2 previousBodyDirection = previousBody.GridPosition - body.GridPosition;
 
-      private void UpdateSavedPositionsCapacity()
-      {
-            GridTile[] tmp = new GridTile[_amountOfLastPlayerPositionsToSave];
-            for (int i = 0; i < _lastSnakeGridTiles.Length; i++)
+            Vector3 worldLookRotationVector =
+                new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
+            body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+        }
+
+        if (previousBody == null && nextBody != null)
+        {
+            Vector2 nextBodyDirection = nextBody.GridPosition - body.GridPosition;
+            Vector2 headPos = new Vector2(_snakeHeadGridTile.X, _snakeHeadGridTile.Y);
+            Vector2 previousBodyDirection = headPos - body.GridPosition;
+            Vector2 directionFromPreviousToNextBody = nextBodyDirection + previousBodyDirection;
+
+            if (directionFromPreviousToNextBody == Vector2.zero)
             {
-                  tmp[i] = _lastSnakeGridTiles[i];
+                Vector3 worldLookRotationVector =
+                    new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
+                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }
+            else
+            {
+                Vector3 worldLookRotationVector = new Vector3(directionFromPreviousToNextBody.x, 0,
+                    directionFromPreviousToNextBody.y);
+                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+            }
+        }
 
-            _lastSnakeGridTiles = tmp;
-      }
+        if (previousBody == null && nextBody == null)
+        {
+            Vector2 headPos = new Vector2(_snakeHeadGridTile.X, _snakeHeadGridTile.Y);
+            Vector2 snakeHeadDirection = headPos - body.GridPosition;
 
-      private void OnEnable()
-      {
-            FruitsCollector.FruitSuccessfullyEaten += FruitsCollectorOnFruitSuccessfullyEaten;
-            SnakeMovement.OnSnakeMoved += SnakeMovement_OnSnakeMoved;
-      }
+            Vector3 worldLookRotationVector =
+                new Vector3(snakeHeadDirection.x, 0f, snakeHeadDirection.y);
+            body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+        }
+    }
 
-      private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int position)
-      {
-            SpawnNewBody();
-      }
+    private void UpdateSnakeBodiesGridPositions()
+    {
+        foreach (SnakeBody snakeBody in _spawnedSnakeBodies)
+        {
+            GridIntItem body = new GridIntItem();
+            body.SetItem(snakeBody.GridPosition.x, snakeBody.GridPosition.y, 1);
+            _gridsManipulator.GridSnakes.TrySetTile(body);
+        }
+    }
 
-      private void SnakeMovement_OnSnakeMoved(object sender, GridTile from)
-      {
-            PlayerMoved(from);
-      }
-      
-      private void OnDisable()
-      {
-            FruitsCollector.FruitSuccessfullyEaten -= FruitsCollectorOnFruitSuccessfullyEaten;
-            SnakeMovement.OnSnakeMoved -= SnakeMovement_OnSnakeMoved;
-      }
+    private void UpdateSavedPositionsCapacity()
+    {
+        GridTile[] tmp = new GridTile[_amountOfLastPlayerPositionsToSave];
+        for (int i = 0; i < _lastSnakeGridTiles.Length; i++)
+        {
+            tmp[i] = _lastSnakeGridTiles[i];
+        }
+
+        _lastSnakeGridTiles = tmp;
+    }
+
+    private void OnEnable()
+    {
+        FruitsCollector.FruitSuccessfullyEaten += FruitsCollectorOnFruitSuccessfullyEaten;
+        SnakeMovement.OnSnakeMoved += SnakeMovement_OnSnakeMoved;
+    }
+
+    private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int position)
+    {
+        SpawnNewBody();
+    }
+
+    private void SnakeMovement_OnSnakeMoved(object sender, SnakeMoveData data)
+    {
+        PlayerMoved(data.PreviousTile, data.CurrentTile);
+    }
+
+    private void OnDisable()
+    {
+        FruitsCollector.FruitSuccessfullyEaten -= FruitsCollectorOnFruitSuccessfullyEaten;
+        SnakeMovement.OnSnakeMoved -= SnakeMovement_OnSnakeMoved;
+    }
 }

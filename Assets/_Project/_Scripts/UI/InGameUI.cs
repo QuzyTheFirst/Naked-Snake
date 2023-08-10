@@ -50,7 +50,7 @@ public class InGameUI : MonoBehaviour
 
     public void StartProgressBarAnimation(float time)
     {
-        Debug.Log(time);
+        //Debug.Log(time);
         
         if (_stepProgressBarCoroutine != null)
         {

@@ -39,8 +39,6 @@ public class GridTiles : IGrid<GridTile>
     
     public void SetGridTiles(IReadOnlyList<GridTile> gridTiles)
     {
-        Debug.Log("Count" + gridTiles.Count);
-        
         foreach (GridTile gridTile in gridTiles)
         {
             _grid[gridTile.X, gridTile.Y] = gridTile;

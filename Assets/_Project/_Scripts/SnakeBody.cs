@@ -6,14 +6,17 @@ public class SnakeBody
 {
     private Vector2Int _gridPosition;
     private Transform _transform;
+    private Transform _spineThing;
 
     public Vector2Int GridPosition => _gridPosition;
     public Transform Transform => _transform;
+    public Transform SpineThing => _spineThing;
 
     public SnakeBody(int x, int y, Transform transform)
     {
         _gridPosition = new Vector2Int(x, y);
         _transform = transform;
+        _spineThing = transform.Find("SpineThing");
     }
 
     public SnakeBody(Vector2Int gridPosition, Transform transform)

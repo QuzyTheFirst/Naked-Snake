@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 897657685226367912}
   - component: {fileID: 5889882488892764053}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: SpineThing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
