@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 
-public class FruitsCollector
+public class FruitsCollector : MonoBehaviour
 {
     public static event EventHandler AllFruitsCollected;
     public static event EventHandler<Vector2Int> FruitSuccessfullyEaten;
@@ -14,18 +14,18 @@ public class FruitsCollector
 
     public static int CollectedFruits => _collectedFruits;
     public static int AmountOfFruitsToCollect => _amountOfFruitsToCollect;
-
-    public FruitsCollector()
-    {
-        SnakeMovement.OnSnakeHitFruit +=  SnakeMovementOnOnSnakeHitFruit;
-    }
-
+    
     public void SetNewTarget(int amountOfFruitsToCollect)
     {
         _amountOfFruitsToCollect = amountOfFruitsToCollect;
         _collectedFruits = 0;
     }
-    
+
+    private void OnEnable()
+    {
+        SnakeMovement.OnSnakeHitFruit +=  SnakeMovementOnOnSnakeHitFruit;
+    }
+
     private void SnakeMovementOnOnSnakeHitFruit(object sender, Vector2Int position)
     {
         _collectedFruits++;
@@ -36,6 +36,11 @@ public class FruitsCollector
         }
         
         FruitSuccessfullyEaten?.Invoke(this, position);
+    }
+    
+    private void OnDisable()
+    {
+        SnakeMovement.OnSnakeHitFruit -=  SnakeMovementOnOnSnakeHitFruit;
     }
 
 }

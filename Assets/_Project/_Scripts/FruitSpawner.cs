@@ -54,11 +54,18 @@ public class FruitSpawner : MonoBehaviour
 
     private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int fruitPos)
     {
-        GridTransformItem item = _gridsManipulator.GridItems.TryGetTile(fruitPos.x, fruitPos.y);
-
-        _gridsManipulator.GridItems.TryClearTile(fruitPos.x, fruitPos.y);
-        Destroy(item.Value.gameObject);
+        GridTransformItem gridItem = _gridsManipulator.GridItems.TryGetTile(fruitPos.x, fruitPos.y);
         
+        if (gridItem == null)
+            return;
+        
+        Transform item = gridItem.Value;
+        
+        if (_gridsManipulator.GridItems.TryClearTile(fruitPos.x, fruitPos.y) && item != null)
+        {
+            Destroy(item.gameObject);
+        }
+
         SpawnFruit();
     }
 

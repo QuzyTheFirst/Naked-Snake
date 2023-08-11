@@ -14,6 +14,7 @@ public class GameEntryPoint : MonoBehaviour
     [SerializeField] private LevelChanger _levelChanger;
     [SerializeField] private CameraController _cameraController;
     [SerializeField] private SnakeExploder _snakeExploder;
+    [SerializeField] private FruitsCollector _fruitsCollector;
 
     private GridTiles _gridTiles;
     private GridItems _gridItems;
@@ -35,7 +36,8 @@ public class GameEntryPoint : MonoBehaviour
             _cameraController,
             _inGameUI,
             _snakeExploder,
-            _gameStateController);
+            _gameStateController,
+            _fruitsCollector);
         _inGameUI.Initialize(_sceneController, _gameStateController, _levelChanger);
         _fruitSpawner.Initialize(_gridsManipulator, LevelGenerator.DistanceBetweenTiles);
         
@@ -44,5 +46,6 @@ public class GameEntryPoint : MonoBehaviour
             _sceneController.LoadNextScene();
         
         _gameStateController.Initialize(_inGameUI, _fruitSpawner);
+        _gameStateController.ContinueGame();
     }
 }

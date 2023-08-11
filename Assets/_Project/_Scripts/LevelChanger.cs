@@ -34,7 +34,7 @@ public class LevelChanger : MonoBehaviour
 
     public SnakeMovement SnakeMovement => _snakeMovement;
 
-    public void Initialize(GridsManipulator gridsManipulator, LevelGenerator levelGenerator, FruitSpawner fruitSpawner, SceneController sceneController, CameraController cameraController, InGameUI inGameUI, SnakeExploder snakeExploder, GameStateController gameStateController)
+    public void Initialize(GridsManipulator gridsManipulator, LevelGenerator levelGenerator, FruitSpawner fruitSpawner, SceneController sceneController, CameraController cameraController, InGameUI inGameUI, SnakeExploder snakeExploder, GameStateController gameStateController, FruitsCollector fruitsCollector)
     {
         _gridsManipulator = gridsManipulator;
         _levelGenerator = levelGenerator;
@@ -43,7 +43,7 @@ public class LevelChanger : MonoBehaviour
 
         _sceneController = sceneController;
 
-        _fruitsCollector = new FruitsCollector();
+        _fruitsCollector = fruitsCollector;
 
         _cameraController = cameraController;
 
