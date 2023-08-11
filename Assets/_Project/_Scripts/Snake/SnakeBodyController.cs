@@ -84,10 +84,10 @@ public class SnakeBodyController : MonoBehaviour
         UpdateSnakeBodiesGridPositions();
         RotateSnakeBodies();
         UpdateSavedPositionsCapacity();
-        ResizeSnakeBodies();
+        ResizeLastThreeBodies();
     }
 
-    private void ResizeSnakeBodies()
+    private void ResizeLastThreeBodies()
     {
         for (int i = _spawnedSnakeBodies.Count - 1; i >= 0; i--)
         {

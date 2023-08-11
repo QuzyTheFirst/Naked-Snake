@@ -34,10 +34,8 @@ public class FruitsCollector
         {
             AllFruitsCollected?.Invoke(this, EventArgs.Empty);
         }
-        else
-        {
-            FruitSuccessfullyEaten?.Invoke(this, position);
-        }
+        
+        FruitSuccessfullyEaten?.Invoke(this, position);
     }
 
 }

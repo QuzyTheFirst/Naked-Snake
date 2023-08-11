@@ -16,16 +16,19 @@ public class MainMenuUI : MonoBehaviour
     public void StartGameBtn()
     {
         _sceneController.LoadNextScene();
+        SoundManager.Instance.Play("ButtonClick");
     }
 
     public void LoadLevelBtn(int levelID)
     {
         _sceneController.LoadScene(levelID);
+        SoundManager.Instance.Play("ButtonClick");
     }
     
     public void ExitGameBtn()
     {
         Application.Quit();
+        SoundManager.Instance.Play("ButtonClick");
     }
 
     public void ToggleAllLevelsMenu(bool value)

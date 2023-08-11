@@ -22,6 +22,7 @@ public class SnakeMovement : PlayerInputHandler
 {
     public static event EventHandler<Vector2Int> OnSnakeHitFruit;
     public static event EventHandler<SnakeMoveData> OnSnakeMoved;
+    public static event EventHandler OnSnakeDeath;
 
     enum MovementDirection
     {
@@ -52,13 +53,15 @@ public class SnakeMovement : PlayerInputHandler
     private InGameUI _inGameUI;
 
     private SnakeBodyController _snakeBodyController;
+    
+    private Rigidbody _rig;
 
-    private CancellationTokenSource _snakeCTS;
+    private SnakeExploder _snakeExploder;
     
     private static float _leanTweenTransitionTime = .1f;
     public static float LeanTweenTransitionTime => _leanTweenTransitionTime;
 
-    public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, Transform snakeParent, InGameUI inGameUI)
+    public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, Transform snakeParent, InGameUI inGameUI, SnakeExploder snakeExploder)
     {
         _gridsManipulator = gridsManipulator;
         _currentGridTile = gridTile;
@@ -67,38 +70,43 @@ public class SnakeMovement : PlayerInputHandler
         _snakeBodyController = GetComponent<SnakeBodyController>();
         _snakeBodyController.Initialize(_snakeParent, _gridsManipulator, _currentGridTile);
 
+        _rig = GetComponent<Rigidbody>();
+        
         _inGameUI = inGameUI;
 
         _currentMoveEach_ms = _normalMoveEach_ms;
+
+        _snakeExploder = snakeExploder;
     }
 
-    public async void StartMoving()
+    public IEnumerator StartMoving()
     {
-        if (_snakeCTS == null)
-            _snakeCTS = new CancellationTokenSource();
+        yield return StartCoroutine(MoveSnake());
 
-        try
+        yield return StartCoroutine(ExplodeSnake());
+
+        OnSnakeDeath?.Invoke(this, EventArgs.Empty);
+    }
+
+    private IEnumerator ExplodeSnake()
+    {
+        Queue<Rigidbody> rigidbodies = new Queue<Rigidbody>();
+        rigidbodies.Enqueue(_rig);
+        
+        foreach (SnakeBody body in _snakeBodyController.SpawnedSnakeBodies)
         {
-            await MoveSnake(_snakeCTS.Token);
-        }
-        catch (TaskCanceledException ex)
-        {
-            Debug.Log("Snake Canceled");
-        }
-        finally
-        {
-            _snakeCTS = null;
+            rigidbodies.Enqueue(body.Rigidbody);
         }
         
-        Debug.Log("Snake is dead");
+        yield return StartCoroutine(_snakeExploder.Explode(rigidbodies));
     }
-
-    private async Task MoveSnake(CancellationToken token)
+    
+    private IEnumerator MoveSnake()
     {
         while (_snakeState == SnakeState.Alive)
         {
             _inGameUI.StartProgressBarAnimation((float)_currentMoveEach_ms * .001f);
-            await Task.Delay(_currentMoveEach_ms, token);
+            yield return new WaitForSeconds(_currentMoveEach_ms * .001f);
 
             // Finding Next Tile
             Vector2Int nextTilePosition =
@@ -142,7 +150,10 @@ public class SnakeMovement : PlayerInputHandler
                 new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
                 Vector3.up;
             //transform.position = newSnakePosition;
-            LeanTween.move(gameObject, newSnakePosition, _leanTweenTransitionTime);
+            LeanTween.move(gameObject, newSnakePosition, _leanTweenTransitionTime).setOnComplete(() =>
+            {
+                SoundManager.Instance.Play("Footstep");
+            });
 
             _lastStepMoveDir = _movementDirection;
 
@@ -150,6 +161,7 @@ public class SnakeMovement : PlayerInputHandler
             if (_gridsManipulator.CheckTileForFruit(_currentGridTile.X, _currentGridTile.Y))
             {
                 OnSnakeHitFruit?.Invoke(this, new Vector2Int(_currentGridTile.X, _currentGridTile.Y));
+                SoundManager.Instance.Play("Chew");
             }
 
             if (_currentGridTile.CurrentTileType == GridTile.TileType.DeathTile)
@@ -160,16 +172,17 @@ public class SnakeMovement : PlayerInputHandler
         }
     }
     
-    public void CancelMovementAndDestroySnake()
+    public void DestroySnake()
     {
-        if (_snakeCTS == null)
-            return;
-        _snakeCTS.Cancel();
-
         foreach (Transform snakePart in _snakeParent)
         {
             Destroy(snakePart.gameObject);
         }
+    }
+    
+    public void DeactivateSnake()
+    {
+        StopAllCoroutines();
     }
     
     private void UpdateSnakeGridPosition()

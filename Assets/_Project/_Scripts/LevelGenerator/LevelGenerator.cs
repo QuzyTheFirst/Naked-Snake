@@ -14,11 +14,11 @@ public class LevelGenerator : MonoBehaviour
     private List<GridTile> _gridTiles;
     private List<Tile> _tiles;
 
-    private int _generatedMapWidth;
-    private int _generatedMapHeight;
+    private static int _generatedMapWidth;
+    private static int _generatedMapHeight;
     
     public static float DistanceBetweenTiles => _distanceBetweenTiles;
-    public Vector2Int GeneratedGridSize => new Vector2Int(_generatedMapWidth, _generatedMapHeight);
+    public static Vector2Int GeneratedGridSize => new Vector2Int(_generatedMapWidth, _generatedMapHeight);
     public IReadOnlyList<GridTile> GridTiles => _gridTiles;
     
 

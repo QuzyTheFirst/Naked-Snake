@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8019176921717227734
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8019176921717227732}
+  - component: {fileID: 8019176921717227735}
+  m_Layer: 0
+  m_Name: '[SoundManager]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8019176921717227732
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8019176921717227734}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.812083, y: 7.1540465, z: 6.418493}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8019176921717227735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8019176921717227734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3f8aaf0659757e4fb5398f073ee051e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: Music
+    clip: {fileID: 8300000, guid: e9d480df4b0692b4a80abb77093072e8, type: 3}
+    volume: 0.4
+    pitch: 1
+    loop: 1
+    randomPitch: 0
+    canPlayWhilePlaying: 0
+    source: {fileID: 0}
+  - name: ButtonClick
+    clip: {fileID: 8300000, guid: 81c23538afdcc9945be71d9e97241be2, type: 3}
+    volume: 0.4
+    pitch: 1
+    loop: 0
+    randomPitch: 1
+    canPlayWhilePlaying: 1
+    source: {fileID: 0}
+  - name: Chew
+    clip: {fileID: 8300000, guid: 75543f0eebe009f44997307c5307d3b2, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    randomPitch: 0
+    canPlayWhilePlaying: 0
+    source: {fileID: 0}
+  - name: Explosion
+    clip: {fileID: 8300000, guid: f43faa43dc6db9f42862abfaeeb22a82, type: 3}
+    volume: 0.4
+    pitch: 1
+    loop: 0
+    randomPitch: 1
+    canPlayWhilePlaying: 1
+    source: {fileID: 0}
+  - name: Footstep
+    clip: {fileID: 8300000, guid: 96ed42cf88012cd409fe610c111860c9, type: 3}
+    volume: 0.2
+    pitch: 1
+    loop: 0
+    randomPitch: 1
+    canPlayWhilePlaying: 1
+    source: {fileID: 0}
+  - name: UhOh
+    clip: {fileID: 8300000, guid: 07e33a64231d37f46918e2ed8829057c, type: 3}
+    volume: 0.4
+    pitch: 1
+    loop: 0
+    randomPitch: 0
+    canPlayWhilePlaying: 0
+    source: {fileID: 0}
+  - name: WinSound
+    clip: {fileID: 8300000, guid: 76de1e2209c099f459f7d9139787cb03, type: 3}
+    volume: 0.4
+    pitch: 1
+    loop: 0
+    randomPitch: 0
+    canPlayWhilePlaying: 0
+    source: {fileID: 0}
+  - name: LostSound
+    clip: {fileID: 8300000, guid: ad6d81a0011fac045ae69f14e5d68eee, type: 3}
+    volume: 0.4
+    pitch: 1
+    loop: 0
+    randomPitch: 0
+    canPlayWhilePlaying: 0
+    source: {fileID: 0}

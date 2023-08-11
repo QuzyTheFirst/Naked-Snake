@@ -12,5 +12,7 @@ public class MainMenuEntryPoint : MonoBehaviour
         Application.targetFrameRate = 60;
         
         _mainMenuUI.Initialize(_sceneController);
+        
+        SoundManager.Instance.Play("Music");
     }
 }
