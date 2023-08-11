@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -63,14 +62,20 @@ public class GameStateController : MonoBehaviour
         SnakeMovement.OnSnakeDeath += SnakeMovementOnOnSnakeDeath;
     }
     
-    private async void FruitsCollector_OnAllFruitsCollected(object sender, EventArgs e)
+    private void FruitsCollector_OnAllFruitsCollected(object sender, EventArgs e)
+    {
+        StartCoroutine(EndGameWithVictory());
+    }
+
+    private IEnumerator EndGameWithVictory()
     {
         _snakeMovement.DeactivateSnake();
         Vector3 center = new Vector3(LevelGenerator.GeneratedGridSize.x * .5f, 0, LevelGenerator.GeneratedGridSize.y * .5f) - (Vector3.one * .5f);
         _winParticles.transform.position = center * LevelGenerator.DistanceBetweenTiles;
         _winParticles.Play();
 
-        await Task.Delay(500);
+        yield return new WaitForSeconds(.5f);
+
         SoundManager.Instance.Play("WinSound");
         _fruitSpawner.DeleteAllFruits();
         _inGameUI.ActivateVictoryMenu();

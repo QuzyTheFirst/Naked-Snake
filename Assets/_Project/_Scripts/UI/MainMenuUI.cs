@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MainMenuUI : MonoBehaviour
@@ -14,14 +12,18 @@ public class MainMenuUI : MonoBehaviour
     }
     
     public void StartGameBtn()
-    {
+    { 
+        LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
+        lvl.LevelID = 0;
         _sceneController.LoadNextScene();
         SoundManager.Instance.Play("ButtonClick");
     }
 
     public void LoadLevelBtn(int levelID)
     {
-        _sceneController.LoadScene(levelID);
+        LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
+        lvl.LevelID = levelID;
+        _sceneController.LoadNextScene();
         SoundManager.Instance.Play("ButtonClick");
     }
     

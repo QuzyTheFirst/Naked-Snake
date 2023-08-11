@@ -40,11 +40,21 @@ public class GameEntryPoint : MonoBehaviour
             _fruitsCollector);
         _inGameUI.Initialize(_sceneController, _gameStateController, _levelChanger);
         _fruitSpawner.Initialize(_gridsManipulator, LevelGenerator.DistanceBetweenTiles);
-        
-        // Setting Up Level or going to end menu
-        if(_levelChanger.TryChangeLevel(0) == false)
-            _sceneController.LoadNextScene();
-        
+
+        LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
+        if (lvl != null)
+        {
+            // Setting Up Level or going to end menu
+            if(_levelChanger.TryChangeLevel(lvl.LevelID) == false)
+                _sceneController.LoadNextScene();
+        }
+        else
+        {
+            // Setting Up Level or going to end menu
+            if(_levelChanger.TryChangeLevel(0) == false)
+                _sceneController.LoadNextScene();
+        }
+
         _gameStateController.Initialize(_inGameUI, _fruitSpawner);
         _gameStateController.ContinueGame();
     }

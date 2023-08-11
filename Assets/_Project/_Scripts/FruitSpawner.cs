@@ -32,7 +32,8 @@ public class FruitSpawner : MonoBehaviour
             throw new Exception("Walkable Tile Wasn't found");
         
         Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _distanceBetweenTiles + Vector3.up;
-        Transform fruit = Instantiate(_fruitPf, spawnPos, Quaternion.identity,transform);
+        Transform fruit = Instantiate(_fruitPf, spawnPos, _fruitPf.rotation,transform);
+        Debug.Log(Quaternion.identity);
 
         GridTransformItem item = new GridTransformItem();
         item.SetItem(tile.X, tile.Y, fruit);

@@ -1173,11 +1173,11 @@ MonoBehaviour:
   _snakeParent: {fileID: 1279957649}
   _allLevels:
   - Map: {fileID: 2800000, guid: 54c7888c8f49ab847bff80136e449cc8, type: 3}
-    ApplesToEat: 5
+    ApplesToEat: 10
   - Map: {fileID: 2800000, guid: b6b65e005b978f34eb51c24b296f8777, type: 3}
-    ApplesToEat: 5
+    ApplesToEat: 30
   - Map: {fileID: 2800000, guid: de01e0d5c187c7d43bcb1b893f333be3, type: 3}
-    ApplesToEat: 5
+    ApplesToEat: 50
   _snakeMovement: {fileID: 0}
 --- !u!4 &2117049415
 Transform:

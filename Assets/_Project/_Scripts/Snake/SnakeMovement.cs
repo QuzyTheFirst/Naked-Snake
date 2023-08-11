@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Quaternion = UnityEngine.Quaternion;
-using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
 public struct SnakeMoveData
@@ -149,11 +142,12 @@ public class SnakeMovement : PlayerInputHandler
             Vector3 newSnakePosition =
                 new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
                 Vector3.up;
-            //transform.position = newSnakePosition;
+            transform.position = newSnakePosition;
+            /*LeanTween.cancel(gameObject);
             LeanTween.move(gameObject, newSnakePosition, _leanTweenTransitionTime).setOnComplete(() =>
             {
                 SoundManager.Instance.Play("Footstep");
-            });
+            });*/
 
             _lastStepMoveDir = _movementDirection;
 
@@ -174,6 +168,7 @@ public class SnakeMovement : PlayerInputHandler
     
     public void DestroySnake()
     {
+        //LeanTween.cancelAll(true);
         foreach (Transform snakePart in _snakeParent)
         {
             Destroy(snakePart.gameObject);

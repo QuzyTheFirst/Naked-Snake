@@ -61,9 +61,10 @@ public class SnakeBodyController : MonoBehaviour
             SnakeBody body = _spawnedSnakeBodies[i];
             GridTile tile = _lastSnakeGridTiles[i];
 
-            //body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-            LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
+            body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            //Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            //LeanTween.cancel(body.Transform.gameObject);
+            //LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
             body.SetGridPosition(tile.X, tile.Y);
         }
 

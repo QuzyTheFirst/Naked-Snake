@@ -9,7 +9,7 @@ public class MainMenuEntryPoint : MonoBehaviour
     [SerializeField] private SceneController _sceneController;
     private void Start()
     {
-        Application.targetFrameRate = 60;
+        //Application.targetFrameRate = 60;
         
         _mainMenuUI.Initialize(_sceneController);
         
