@@ -7,11 +7,14 @@ public class MainMenuEntryPoint : MonoBehaviour
 {
     [SerializeField] private MainMenuUI _mainMenuUI;
     [SerializeField] private SceneController _sceneController;
+
+    [SerializeField] private Sprite[] _levelsSprites;
+
     private void Start()
     {
-        //Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60;
         
-        _mainMenuUI.Initialize(_sceneController);
+        _mainMenuUI.Initialize(_sceneController, _levelsSprites);
         
         SoundManager.Instance.Play("Music");
     }

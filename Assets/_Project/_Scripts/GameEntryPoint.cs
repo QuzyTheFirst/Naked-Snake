@@ -11,7 +11,7 @@ public class GameEntryPoint : MonoBehaviour
     [SerializeField] private LevelGenerator _levelGenerator;
     [SerializeField] private GameStateController _gameStateController;
     [SerializeField] private FruitSpawner _fruitSpawner;
-    [SerializeField] private LevelChanger _levelChanger;
+    [SerializeField] private LevelController _levelChanger;
     [SerializeField] private CameraController _cameraController;
     [SerializeField] private SnakeExploder _snakeExploder;
     [SerializeField] private FruitsCollector _fruitsCollector;
@@ -32,30 +32,19 @@ public class GameEntryPoint : MonoBehaviour
         _levelChanger.Initialize(
             _gridsManipulator,
             _levelGenerator,
-            _fruitSpawner, _sceneController,
+            _fruitSpawner,
             _cameraController,
             _inGameUI,
             _snakeExploder,
             _gameStateController,
             _fruitsCollector);
         _inGameUI.Initialize(_sceneController, _gameStateController, _levelChanger);
-        _fruitSpawner.Initialize(_gridsManipulator, LevelGenerator.DistanceBetweenTiles);
+        _fruitSpawner.Initialize(_gridsManipulator);
 
         LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
-        if (lvl != null)
-        {
-            // Setting Up Level or going to end menu
-            if(_levelChanger.TryChangeLevel(lvl.LevelID) == false)
-                _sceneController.LoadNextScene();
-        }
-        else
-        {
-            // Setting Up Level or going to end menu
-            if(_levelChanger.TryChangeLevel(0) == false)
-                _sceneController.LoadNextScene();
-        }
+        _levelChanger.TryCollectLevel(lvl);
 
-        _gameStateController.Initialize(_inGameUI, _fruitSpawner);
+        _gameStateController.Initialize(_inGameUI, _fruitsCollector);
         _gameStateController.ContinueGame();
     }
 }

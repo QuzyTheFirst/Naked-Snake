@@ -61,10 +61,12 @@ public class SnakeBodyController : MonoBehaviour
             SnakeBody body = _spawnedSnakeBodies[i];
             GridTile tile = _lastSnakeGridTiles[i];
 
-            body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-            //Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-            //LeanTween.cancel(body.Transform.gameObject);
-            //LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
+            //body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+
+            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+            LeanTween.cancel(body.Transform.gameObject);
+            LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
+
             body.SetGridPosition(tile.X, tile.Y);
         }
 
@@ -85,10 +87,10 @@ public class SnakeBodyController : MonoBehaviour
         UpdateSnakeBodiesGridPositions();
         RotateSnakeBodies();
         UpdateSavedPositionsCapacity();
-        ResizeLastThreeBodies();
+        FadeOutLastThreeBodies();
     }
 
-    private void ResizeLastThreeBodies()
+    private void FadeOutLastThreeBodies()
     {
         for (int i = _spawnedSnakeBodies.Count - 1; i >= 0; i--)
         {
@@ -198,11 +200,11 @@ public class SnakeBodyController : MonoBehaviour
 
     private void OnEnable()
     {
-        FruitsCollector.FruitSuccessfullyEaten += FruitsCollectorOnFruitSuccessfullyEaten;
+        SnakeMovement.OnSnakeHitFruit += SnakeMovement_OnSnakeHitFruit;
         SnakeMovement.OnSnakeMoved += SnakeMovement_OnSnakeMoved;
     }
 
-    private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int position)
+    private void SnakeMovement_OnSnakeHitFruit(object sender, Vector2Int e)
     {
         SpawnNewBody();
     }
@@ -214,7 +216,7 @@ public class SnakeBodyController : MonoBehaviour
 
     private void OnDisable()
     {
-        FruitsCollector.FruitSuccessfullyEaten -= FruitsCollectorOnFruitSuccessfullyEaten;
+        SnakeMovement.OnSnakeHitFruit -= SnakeMovement_OnSnakeHitFruit;
         SnakeMovement.OnSnakeMoved -= SnakeMovement_OnSnakeMoved;
     }
 }

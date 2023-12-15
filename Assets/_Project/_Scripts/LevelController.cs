@@ -4,24 +4,19 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class LevelChanger : MonoBehaviour
+public class LevelController : MonoBehaviour
 {
     [Header("Snakes")]
     [SerializeField] private Transform _snakePf;
     [SerializeField] private Transform _snakeParent;
-    
-    [Header("Levels")]
-    [SerializeField] private List<Level> _allLevels;
 
-    private int _currentLevelID = 0;
+    private LevelToLoadInfo _currentLevelInfo;
 
     private GridsManipulator _gridsManipulator;
     private LevelGenerator _levelGenerator;
 
     private FruitSpawner _fruitSpawner;
     private FruitsCollector _fruitsCollector;
-    
-    private SceneController _sceneController;
 
     [SerializeField]private SnakeMovement _snakeMovement;
     private CameraController _cameraController;
@@ -34,14 +29,12 @@ public class LevelChanger : MonoBehaviour
 
     public SnakeMovement SnakeMovement => _snakeMovement;
 
-    public void Initialize(GridsManipulator gridsManipulator, LevelGenerator levelGenerator, FruitSpawner fruitSpawner, SceneController sceneController, CameraController cameraController, InGameUI inGameUI, SnakeExploder snakeExploder, GameStateController gameStateController, FruitsCollector fruitsCollector)
+    public void Initialize(GridsManipulator gridsManipulator, LevelGenerator levelGenerator, FruitSpawner fruitSpawner, CameraController cameraController, InGameUI inGameUI, SnakeExploder snakeExploder, GameStateController gameStateController, FruitsCollector fruitsCollector)
     {
         _gridsManipulator = gridsManipulator;
         _levelGenerator = levelGenerator;
 
         _fruitSpawner = fruitSpawner;
-
-        _sceneController = sceneController;
 
         _fruitsCollector = fruitsCollector;
 
@@ -54,42 +47,36 @@ public class LevelChanger : MonoBehaviour
         _gameStateController = gameStateController;
     }
     
-    public bool TryChangeLevel(int levelID)
+    public bool TryCollectLevel(LevelToLoadInfo levelInfo)
     {
-        if (levelID >= _allLevels.Count)
+        if (levelInfo == null)
             return false;
 
         //Generating Level and Grid
-        _levelGenerator.GenerateLevel(_allLevels[levelID].Map);
+        _levelGenerator.GenerateLevel(levelInfo.LevelSprite.texture);
+
         _gridsManipulator.SetGridsSize(LevelGenerator.GeneratedGridSize.x, LevelGenerator.GeneratedGridSize.y);
         _gridsManipulator.GridTiles.SetGridTiles(_levelGenerator.GridTiles);
 
-        _fruitsCollector.SetNewTarget(_allLevels[levelID].ApplesToEat);
-        _inGameUI.UpdateApplesTextField(0, _allLevels[levelID].ApplesToEat);
-
         _cameraController.SetNewCameraPos(LevelGenerator.GeneratedGridSize.x, LevelGenerator.GeneratedGridSize.y);
 
-        // Cleaning Previous Stuff
-        _fruitSpawner.DeleteAllFruits();
-
-        if (_snakeMovement != null)
-            _snakeMovement.DestroySnake();
-
-        // Spawning New Stuff
+        // Spawning Stuff
         _fruitSpawner.SpawnFruit();
 
         GridTile tile = _gridsManipulator.GridTiles.GetRandomSpawnTile();
         Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+
         SnakeMovement snakeMovement = Instantiate(_snakePf, spawnPos, Quaternion.identity, _snakeParent)
             .GetComponent<SnakeMovement>();
+
         snakeMovement.Initialize(_gridsManipulator, tile, _snakeParent, _inGameUI, _snakeExploder);
+
         _snakeMovement = snakeMovement;
-        _gameStateController.SetSnakeMovement(_snakeMovement);
 
         // Let Snake Go Wild
         StartCoroutine(snakeMovement.StartMoving());
 
-        _currentLevelID = levelID;
+        _currentLevelInfo = levelInfo;
         _gameStateController.CurrentGameState = GameStateController.GameState.Active;
 
         return true;
@@ -97,23 +84,13 @@ public class LevelChanger : MonoBehaviour
 
     public void RestartLevel()
     {
-        if (TryChangeLevel(_currentLevelID) == false)
-        {
-            if (_snakeMovement != null)
-                _snakeMovement.DestroySnake();
-            
-            _sceneController.LoadNextScene();
-        }
-    }
+        // Cleaning Previous Stuff
+        _fruitSpawner.DeleteAllFruits();
+        _fruitsCollector.ResetCollectedFruitsAmount();
 
-    public void LoadNextLevel()
-    {
-        if (TryChangeLevel(_currentLevelID + 1) == false)
-        {
-            if (_snakeMovement != null)
-                _snakeMovement.DestroySnake();
-            
-            _sceneController.LoadNextScene();
-        }
+        if (_snakeMovement != null)
+            _snakeMovement.DestroySnake();
+
+        TryCollectLevel(_currentLevelInfo);
     }
 }

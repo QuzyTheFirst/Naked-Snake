@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class GameStateController : MonoBehaviour
@@ -9,17 +7,13 @@ public class GameStateController : MonoBehaviour
     {
         Paused,
         Active,
-        Win,
         Lost
     }
 
     private GameState _currentGameState = GameState.Active;
     
     private InGameUI _inGameUI;
-    private SnakeMovement _snakeMovement;
-    private FruitSpawner _fruitSpawner;
-
-    [SerializeField] private ParticleSystem _winParticles;
+    private FruitsCollector _fruitCollector;
     
     public GameState CurrentGameState
     {
@@ -27,20 +21,15 @@ public class GameStateController : MonoBehaviour
         set { _currentGameState = value; }
     }
     
-    public void Initialize(InGameUI inGameUI, FruitSpawner fruitSpawner)
+    public void Initialize(InGameUI inGameUI, FruitsCollector fruitCollector)
     {
         _inGameUI = inGameUI;
-        _fruitSpawner = fruitSpawner;
-    }
-
-    public void SetSnakeMovement(SnakeMovement snakeMovement)
-    {
-        _snakeMovement = snakeMovement;
+        _fruitCollector = fruitCollector;
     }
     
     public void PauseGame()
     {
-        _inGameUI.TogglePauseMenu(true);
+        _inGameUI.OpenPauseMenu();
         
         Time.timeScale = 0;
         
@@ -49,7 +38,7 @@ public class GameStateController : MonoBehaviour
 
     public void ContinueGame()
     {
-        _inGameUI.TogglePauseMenu(false);
+        _inGameUI.ClosePauseMenu();
         
         Time.timeScale = 1;
         
@@ -58,40 +47,19 @@ public class GameStateController : MonoBehaviour
 
     private void OnEnable()
     {
-        FruitsCollector.AllFruitsCollected += FruitsCollector_OnAllFruitsCollected;
         SnakeMovement.OnSnakeDeath += SnakeMovementOnOnSnakeDeath;
     }
-    
-    private void FruitsCollector_OnAllFruitsCollected(object sender, EventArgs e)
-    {
-        StartCoroutine(EndGameWithVictory());
-    }
 
-    private IEnumerator EndGameWithVictory()
-    {
-        _snakeMovement.DeactivateSnake();
-        Vector3 center = new Vector3(LevelGenerator.GeneratedGridSize.x * .5f, 0, LevelGenerator.GeneratedGridSize.y * .5f) - (Vector3.one * .5f);
-        _winParticles.transform.position = center * LevelGenerator.DistanceBetweenTiles;
-        _winParticles.Play();
-
-        yield return new WaitForSeconds(.5f);
-
-        SoundManager.Instance.Play("WinSound");
-        _fruitSpawner.DeleteAllFruits();
-        _inGameUI.ActivateVictoryMenu();
-        _currentGameState = GameState.Win;
-    }
-    
     private  void SnakeMovementOnOnSnakeDeath(object sender, EventArgs e)
     {
         _inGameUI.ActivateDeathMenu();
+        _inGameUI.SetDeathMenuText($"Game Over!\nIs your snake on a diet?\nYou have eaten just {_fruitCollector.CollectedFruits} fruit(s)!\nTry to feed it more!");
         _currentGameState = GameState.Lost;
         SoundManager.Instance.Play("LostSound");
     }
 
     private void OnDisable()
     {
-        FruitsCollector.AllFruitsCollected -= FruitsCollector_OnAllFruitsCollected;
         SnakeMovement.OnSnakeDeath -= SnakeMovementOnOnSnakeDeath;
     }
 }

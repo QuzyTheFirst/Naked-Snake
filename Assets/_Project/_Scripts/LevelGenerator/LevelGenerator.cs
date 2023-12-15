@@ -5,13 +5,13 @@ public class LevelGenerator : MonoBehaviour
 {
     private static float _distanceBetweenTiles = 1.2f;
 
+    private static int _generatedMapWidth;
+    private static int _generatedMapHeight;
+
     [SerializeField] private ColorToPrefab[] colorMappings;
 
     private List<GridTile> _gridTiles;
     private List<Tile> _tiles;
-
-    private static int _generatedMapWidth;
-    private static int _generatedMapHeight;
     
     public static float DistanceBetweenTiles => _distanceBetweenTiles;
     public static Vector2Int GeneratedGridSize => new Vector2Int(_generatedMapWidth, _generatedMapHeight);

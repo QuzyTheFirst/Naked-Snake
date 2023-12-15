@@ -142,12 +142,12 @@ public class SnakeMovement : PlayerInputHandler
             Vector3 newSnakePosition =
                 new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
                 Vector3.up;
-            transform.position = newSnakePosition;
-            /*LeanTween.cancel(gameObject);
+            //transform.position = newSnakePosition;
+            LeanTween.cancel(gameObject);
             LeanTween.move(gameObject, newSnakePosition, _leanTweenTransitionTime).setOnComplete(() =>
             {
                 SoundManager.Instance.Play("Footstep");
-            });*/
+            });
 
             _lastStepMoveDir = _movementDirection;
 
@@ -193,19 +193,19 @@ public class SnakeMovement : PlayerInputHandler
         {
             case MovementDirection.Up:
                 return Vector2Int.up;
-                break;
+                
             case MovementDirection.Down:
                 return Vector2Int.down;
-                break;
+                
             case MovementDirection.Left:
                 return Vector2Int.left;
-                break;
+                
             case MovementDirection.Right:
                 return Vector2Int.right;
-                break;
+                
             default:
                 return Vector2Int.zero;
-                break;
+                
         }
     }
 
@@ -215,19 +215,19 @@ public class SnakeMovement : PlayerInputHandler
         {
             case MovementDirection.Up:
                 return MovementDirection.Down;
-                break;
+                
             case MovementDirection.Down:
                 return MovementDirection.Up;
-                break;
+                
             case MovementDirection.Left:
                 return MovementDirection.Right;
-                break;
+                
             case MovementDirection.Right:
                 return MovementDirection.Left;
-                break;
+                
             default:
                 throw new Exception("Where are you even going?");
-                break;
+                
         }
     }
 

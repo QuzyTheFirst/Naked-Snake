@@ -7,16 +7,12 @@ using Random = UnityEngine.Random;
 public class FruitSpawner : MonoBehaviour
 {
     [SerializeField] private Transform _fruitPf;
-    [SerializeField] private int _amountOfTriesToFindRightTile = 5;
 
     private GridsManipulator _gridsManipulator;
-    private float _distanceBetweenTiles;
 
-    public void Initialize(GridsManipulator gridsManipulator , float distanceBetweenTiles)
+    public void Initialize(GridsManipulator gridsManipulator)
     {
         _gridsManipulator = gridsManipulator;
-        _distanceBetweenTiles = distanceBetweenTiles;
-
     }
     
     public void SpawnFruit()
@@ -31,7 +27,7 @@ public class FruitSpawner : MonoBehaviour
         if (tile == null) 
             throw new Exception("Walkable Tile Wasn't found");
         
-        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * _distanceBetweenTiles + Vector3.up;
+        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
         Transform fruit = Instantiate(_fruitPf, spawnPos, _fruitPf.rotation,transform);
         Debug.Log(Quaternion.identity);
 
@@ -50,18 +46,18 @@ public class FruitSpawner : MonoBehaviour
     
     private void OnEnable()
     {
-        FruitsCollector.FruitSuccessfullyEaten += FruitsCollectorOnFruitSuccessfullyEaten;
+        SnakeMovement.OnSnakeHitFruit += SnakeMovement_OnSnakeHitFruit;
     }
 
-    private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int fruitPos)
+    private void SnakeMovement_OnSnakeHitFruit(object sender, Vector2Int fruitPos)
     {
         GridTransformItem gridItem = _gridsManipulator.GridItems.TryGetTile(fruitPos.x, fruitPos.y);
-        
+
         if (gridItem == null)
             return;
-        
+
         Transform item = gridItem.Value;
-        
+
         if (_gridsManipulator.GridItems.TryClearTile(fruitPos.x, fruitPos.y) && item != null)
         {
             Destroy(item.gameObject);
@@ -70,9 +66,8 @@ public class FruitSpawner : MonoBehaviour
         SpawnFruit();
     }
 
-
     private void OnDisable()
     {
-        FruitsCollector.FruitSuccessfullyEaten -= FruitsCollectorOnFruitSuccessfullyEaten;
+        SnakeMovement.OnSnakeHitFruit -= SnakeMovement_OnSnakeHitFruit;
     }
 }

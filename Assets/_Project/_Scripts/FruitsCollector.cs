@@ -6,19 +6,16 @@ using System;
 
 public class FruitsCollector : MonoBehaviour
 {
-    public static event EventHandler AllFruitsCollected;
-    public static event EventHandler<Vector2Int> FruitSuccessfullyEaten;
-    
-    private static int _collectedFruits;
-    private static int _amountOfFruitsToCollect;
+    private int _collectedFruits;
 
-    public static int CollectedFruits => _collectedFruits;
-    public static int AmountOfFruitsToCollect => _amountOfFruitsToCollect;
-    
-    public void SetNewTarget(int amountOfFruitsToCollect)
+    public static event EventHandler<int> OnCollectedFruitAmountChanged;
+
+    public int CollectedFruits => _collectedFruits;
+
+    public void ResetCollectedFruitsAmount()
     {
-        _amountOfFruitsToCollect = amountOfFruitsToCollect;
         _collectedFruits = 0;
+        OnCollectedFruitAmountChanged?.Invoke(this, CollectedFruits);
     }
 
     private void OnEnable()
@@ -29,13 +26,7 @@ public class FruitsCollector : MonoBehaviour
     private void SnakeMovementOnOnSnakeHitFruit(object sender, Vector2Int position)
     {
         _collectedFruits++;
-
-        if (_collectedFruits >= _amountOfFruitsToCollect)
-        {
-            AllFruitsCollected?.Invoke(this, EventArgs.Empty);
-        }
-        
-        FruitSuccessfullyEaten?.Invoke(this, position);
+        OnCollectedFruitAmountChanged?.Invoke(this, CollectedFruits);
     }
     
     private void OnDisable()

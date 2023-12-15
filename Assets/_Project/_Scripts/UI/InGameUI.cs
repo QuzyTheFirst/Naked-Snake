@@ -3,26 +3,35 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class InGameUI : UIInputHandler
 {
-    [SerializeField] private GameObject _pauseMenu;
-    [SerializeField] private GameObject _deathMenu;
-    [SerializeField] private GameObject _victoryMenu;
+    [Header("Properties")]
+    [SerializeField] private Slider _stepProgressBar;
     [SerializeField] private TextMeshProUGUI _applesTextField;
     [SerializeField] private GameObject _shiftText;
-    [SerializeField] private Slider _stepProgressBar;
-    
+
+    [Header("Pause Menu")]
+    [SerializeField] private GameObject _pauseMenu;
+
+    [Header("Death Menu")]
+    [SerializeField] private GameObject _deathMenu;
+    [SerializeField] private Text _deathMenuTextField;
+
+    [Header("First Selected Options")]
+    [SerializeField] private GameObject _pauseMenuFirst;
+    [SerializeField] private GameObject _deathMenuFirst;
+
     private SceneController _sceneController;
     private GameStateController _gameStateController;
-    private LevelChanger _levelChanger;
+    private LevelController _levelChanger;
 
     private Coroutine _stepProgressBarCoroutine;
 
     private bool _isDeathMenuActivated = false;
-    private bool _isVictoryMenuActivated = false;
 
-    public void Initialize(SceneController sceneController, GameStateController gameStateController, LevelChanger levelChanger)
+    public void Initialize(SceneController sceneController, GameStateController gameStateController, LevelController levelChanger)
     {
         _sceneController = sceneController;
         _gameStateController = gameStateController;
@@ -49,21 +58,21 @@ public class InGameUI : UIInputHandler
         SoundManager.Instance.Play("ButtonClick");
     }
 
-    public void NextLevelBtn()
+    public void UpdateApplesTextField(int apples)
     {
-        _levelChanger.LoadNextLevel();
-        DeactivateVictoryMenu();
-        SoundManager.Instance.Play("ButtonClick");
+        _applesTextField.SetText($"{apples}");
     }
 
-    public void UpdateApplesTextField(int apples, int applesToWin)
+    public void OpenPauseMenu()
     {
-        _applesTextField.SetText($"{apples} / {applesToWin}");
+        _pauseMenu.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(_pauseMenuFirst);
     }
-    
-    public void TogglePauseMenu(bool value)
+
+    public void ClosePauseMenu()
     {
-        _pauseMenu.SetActive(value);
+        _pauseMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     public void ToggleShiftText(bool value)
@@ -75,26 +84,20 @@ public class InGameUI : UIInputHandler
     {
         _deathMenu.SetActive(true);
         _gameStateController.ContinueGame();
+        EventSystem.current.SetSelectedGameObject(_deathMenuFirst);
         _isDeathMenuActivated = true;
+    }
+
+    public void SetDeathMenuText(string text)
+    {
+        _deathMenuTextField.text = text;
     }
 
     public void DeactivateDeathMenu()
     {
         _deathMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(null);
         _isDeathMenuActivated = false;
-    }
-    
-    public void ActivateVictoryMenu()
-    {
-        _victoryMenu.SetActive(true);
-        _gameStateController.ContinueGame();
-        _isVictoryMenuActivated = true;
-    }
-
-    public void DeactivateVictoryMenu()
-    {
-        _victoryMenu.SetActive(false);
-        _isVictoryMenuActivated = false;
     }
 
     public void StartProgressBarAnimation(float time)
@@ -127,19 +130,21 @@ public class InGameUI : UIInputHandler
     {
         base.OnEnable();
         
-        FruitsCollector.FruitSuccessfullyEaten += FruitsCollectorOnFruitSuccessfullyEaten;
         OnPauseButtonPressed += InGameUI_OnPauseButtonPressed;
+        OnReturnButtonPressed += InGameUI_OnReturnButtonPressed;
+        FruitsCollector.OnCollectedFruitAmountChanged += FruitsCollector_OnCollectedFruitAmountChanged;
     }
-    
-    private void FruitsCollectorOnFruitSuccessfullyEaten(object sender, Vector2Int e)
+
+
+    private void FruitsCollector_OnCollectedFruitAmountChanged(object sender, int fruitsCollectedAmount)
     {
-        UpdateApplesTextField(FruitsCollector.CollectedFruits, FruitsCollector.AmountOfFruitsToCollect);
+        UpdateApplesTextField(fruitsCollectedAmount);
     }
-    
+
     private void InGameUI_OnPauseButtonPressed(object sender, EventArgs e)
     {
         Debug.Log("Trying to open pause menu");
-        if (_isDeathMenuActivated || _isVictoryMenuActivated)
+        if (_isDeathMenuActivated)
             return;
         
         switch (_gameStateController.CurrentGameState)
@@ -154,11 +159,25 @@ public class InGameUI : UIInputHandler
         SoundManager.Instance.Play("ButtonClick");
     }
 
+
+    private void InGameUI_OnReturnButtonPressed(object sender, EventArgs e)
+    {
+        Debug.Log("Trying to open pause menu");
+        if (_isDeathMenuActivated)
+            return;
+
+        if (_gameStateController.CurrentGameState == GameStateController.GameState.Paused)
+        {
+            _gameStateController.ContinueGame();
+        }
+        SoundManager.Instance.Play("ButtonClick");
+    }
+
     protected override void OnDisable()
     {
         base.OnDisable();
-        
-        FruitsCollector.FruitSuccessfullyEaten -= FruitsCollectorOnFruitSuccessfullyEaten;
+
         OnPauseButtonPressed -= InGameUI_OnPauseButtonPressed;
+        FruitsCollector.OnCollectedFruitAmountChanged += FruitsCollector_OnCollectedFruitAmountChanged;
     }
 }
