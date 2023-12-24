@@ -11,6 +11,7 @@ public class LevelEditor : MonoBehaviour
     
     private LevelEditorGrid _levelEditorGrid;
     private LevelEditorSaveLoad _levelEditorSaveLoad;
+    private LevelEditorMapRulesChecker _levelEditorMapRulesChecker;
 
     private LevelEditorGrid.LevelEditorGridObject _lastLevelGridObject;
     
@@ -20,6 +21,7 @@ public class LevelEditor : MonoBehaviour
     {
         _levelEditorGrid = new LevelEditorGrid(20, 20 , _cellSize, _originPosition);
         _levelEditorSaveLoad = new LevelEditorSaveLoad();
+        _levelEditorMapRulesChecker = new LevelEditorMapRulesChecker();
         _currentBrushType = LevelEditorGrid.LevelEditorGridObject.TileType.Walkable;
     }
 
@@ -29,11 +31,20 @@ public class LevelEditor : MonoBehaviour
         _levelEditorGrid.SetLevelEditorSaveLoad(_levelEditorSaveLoad);
     }
 
-    public void SetupLevelToLoadInfo(LevelToLoadInfo levelToLoadInfo)
+    public void TrySetupLevelToLoadInfo(LevelToLoadInfo levelToLoadInfo)
     {
-        Texture2D levelTexture = _levelEditorSaveLoad.GetTexture2D(true);
-        Sprite levelSprite = Sprite.Create(levelTexture, new Rect(0, 0, levelTexture.width, levelTexture.height), Vector2.zero);
-        levelToLoadInfo.SetLevelSprite(levelSprite);
+        try
+        {
+            Texture2D levelTexture = _levelEditorSaveLoad.GetTexture2D(true);
+            _levelEditorMapRulesChecker.CheckMapForRules(levelTexture);
+            Sprite levelSprite = Sprite.Create(levelTexture, new Rect(0, 0, levelTexture.width, levelTexture.height),
+                Vector2.zero);
+            levelToLoadInfo.SetLevelSprite(levelSprite);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     public void ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType brushType)
@@ -43,13 +54,27 @@ public class LevelEditor : MonoBehaviour
 
     public void SaveMap()
     {
-        _levelEditorSaveLoad.Save();
+        try
+        {
+            _levelEditorSaveLoad.Save();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.Message);
+        }
     }
 
     public void LoadMap()
     {
-        Texture2D map = _levelEditorSaveLoad.Load();
-        _levelEditorGrid.SetLevelEditorTiles(map);
+        try
+        {
+            Texture2D map = _levelEditorSaveLoad.Load();
+            _levelEditorGrid.SetLevelEditorTiles(map);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.Message);
+        }
     }
     
     private void Update()

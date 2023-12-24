@@ -8,6 +8,10 @@ public class LevelEditorGrid
 {
     private Grid<LevelEditorGridObject> _grid;
 
+    private int _obstacleTiles = 0;
+    private int _walkableTiles = 0;
+    private int _spawnpointTiles = 0;
+    
     public LevelEditorGrid(int width, int height, float cellsize, Vector3 originPosition)
     {
         _grid = new Grid<LevelEditorGridObject>(width, height, cellsize, originPosition, (Grid<LevelEditorGridObject> grid, int x, int y) => new LevelEditorGridObject(grid, x, y));

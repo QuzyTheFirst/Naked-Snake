@@ -1,0 +1,106 @@
+{
+    "name": "LevelEditorControls",
+    "maps": [
+        {
+            "name": "Controls",
+            "id": "4efb4d9a-2db8-4d81-abed-2c8d94d4d083",
+            "actions": [
+                {
+                    "name": "ObstacleBrush",
+                    "type": "Button",
+                    "id": "fc0d2fa4-ca7a-4662-a1c5-e8b338e0f69d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SpawnpointBrush",
+                    "type": "Button",
+                    "id": "5bbbea12-5915-4eb1-be3b-544bf55cf47a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "WalkableBrush",
+                    "type": "Button",
+                    "id": "4f3191ca-3572-4377-9d3c-b3c55d936c6c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EraserBrush",
+                    "type": "Button",
+                    "id": "28dd8680-2f7c-4e07-afd1-ad232df5d1ac",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fa375069-4d64-4517-af8e-b67dccc7a05a",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardScheme",
+                    "action": "ObstacleBrush",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "11e26e9d-0c24-4445-a8cf-66d21e2fc6eb",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardScheme",
+                    "action": "SpawnpointBrush",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "984e17d0-6561-4ff3-a447-53afeb131623",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardScheme",
+                    "action": "WalkableBrush",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "81b9247f-1f0a-47f7-870d-284a8531ef6e",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardScheme",
+                    "action": "EraserBrush",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "KeyboardScheme",
+            "bindingGroup": "KeyboardScheme",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}

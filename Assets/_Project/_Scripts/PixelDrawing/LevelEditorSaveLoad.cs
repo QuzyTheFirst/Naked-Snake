@@ -18,10 +18,7 @@ public class LevelEditorSaveLoad
         string path = StandaloneFileBrowser.SaveFilePanel("Save File", "", "MyMap", "png");
 
         if (String.IsNullOrEmpty(path))
-        {
-            Debug.LogWarning("Path is empty!");
-            return;
-        }
+            throw new Exception("Path is empty!");
         
         Texture2D texture2D = GetTexture2D(false);
         texture2D.Apply();
@@ -34,18 +31,21 @@ public class LevelEditorSaveLoad
         string[] paths = StandaloneFileBrowser.OpenFilePanel("Open File", "", "png", false);
 
         if (paths.Length == 0)
-            return null;
+            throw new Exception("Path is empty!");
         
         if (String.IsNullOrEmpty(paths[0]))
-        {
-            Debug.LogWarning("Path is empty!");
-            return null;
-        }
+            throw new Exception("Path is empty!");
         
         Texture2D texture2D = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 
         byte[] byteArray = System.IO.File.ReadAllBytes(paths[0]);
         texture2D.LoadImage(byteArray);
+
+        if (texture2D.width != 20 || texture2D.height != 20)
+        {
+            throw new Exception("Texture has wrong width or height! (Texture should be 20x20)");
+        }
+        
         return texture2D;
     }
     
@@ -56,8 +56,6 @@ public class LevelEditorSaveLoad
         {
             for(int y = 0; y < _grid.GetHeight(); y++)
             {
-                int index = x * _grid.GetHeight() + y;
-
                 LevelEditorGrid.LevelEditorGridObject levelEditorGridObject = _grid.GetGridObject(x, y);
                 switch (levelEditorGridObject.GetTileType())
                 {
@@ -109,6 +107,9 @@ public class LevelEditorSaveLoad
             }
         }
 
+        if (startingX == texture.width || endingX == 0 || startingY == texture.height || endingY == 0)
+            throw new Exception("Couldn't find any drawings!");
+        
         if (endingX < texture.width)
             endingX++;
         if (endingY < texture.height)
@@ -118,11 +119,6 @@ public class LevelEditorSaveLoad
         height = endingY - startingY;
         
         Color[] colors = texture.GetPixels(startingX, startingY, width, height);
-        
-        
-        Debug.Log($"Width: {width} | Height: {height}");
-        Debug.Log($"Starting X: {startingX} | Ending X: {endingX}");
-        Debug.Log($"Starting Y: {startingY} | Ending Y: {endingY}");
 
         Texture2D outputTexture = new Texture2D(width, height, TextureFormat.ARGB32, false);
         outputTexture.SetPixels(colors);
