@@ -66,4 +66,9 @@ public class LevelEditorUI : MonoBehaviour
     {
         _levelEditor.ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Empty);
     }
+
+    public void ExitLevelEditor()
+    {
+        SceneManager.LoadScene(0);
+    }
 }

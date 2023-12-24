@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelEditor : MonoBehaviour
@@ -41,7 +39,7 @@ public class LevelEditor : MonoBehaviour
                 Vector2.zero);
             levelToLoadInfo.SetLevelSprite(levelSprite);
         }
-        catch (Exception ex)
+        catch
         {
             throw;
         }
