@@ -24,12 +24,6 @@ public class MainMenuUI : UIInputHandler
 
         EventSystem.current.SetSelectedGameObject(_mainMenuFirst);
     }
-    
-    public void ExitGameBtn()
-    {
-        Application.Quit();
-        SoundManager.Instance.Play("ButtonClick");
-    }
 
     public void OpenAllLevelsMenu()
     {
@@ -43,6 +37,11 @@ public class MainMenuUI : UIInputHandler
         _levelsMenu.SetActive(false);
     }
 
+    public void OpenLevelEditor()
+    {
+        _sceneController.LoadLevelEditor();
+    }
+    
     private void GenerateLevelButtons(Sprite[] levelsSprites)
     {
         for(int i = 0; i < levelsSprites.Length; i++)

@@ -8,9 +8,14 @@ public class SceneController : MonoBehaviour
 { 
     public void LoadGameScene()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneManager.LoadScene(2);
     }
 
+    public void LoadLevelEditor()
+    {
+        SceneManager.LoadScene(1);
+    }
+    
     public void LoadMainMenu()
     {
         SceneManager.LoadScene(0);

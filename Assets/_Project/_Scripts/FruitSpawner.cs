@@ -29,7 +29,6 @@ public class FruitSpawner : MonoBehaviour
         
         Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
         Transform fruit = Instantiate(_fruitPf, spawnPos, _fruitPf.rotation,transform);
-        Debug.Log(Quaternion.identity);
 
         GridTransformItem item = new GridTransformItem();
         item.SetItem(tile.X, tile.Y, fruit);

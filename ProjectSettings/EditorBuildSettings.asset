@@ -9,9 +9,9 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/MainMenu.unity
     guid: ac3d24e293b6c2743913c56326079be5
   - enabled: 1
+    path: Assets/_Project/Scenes/LevelEditor.unity
+    guid: 947914628c2c34f4b8b50005998b76fc
+  - enabled: 1
     path: Assets/_Project/Scenes/GameScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
-    path: Assets/_Project/Scenes/ExitMenu.unity
-    guid: 3888814e231db5544ad7be57b11db1c4
   m_configObjects: {}
