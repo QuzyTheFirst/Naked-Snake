@@ -59,8 +59,6 @@ public class MainMenuUI : UIInputHandler
 
             button.onClick.AddListener(() =>
             {
-                Debug.Log(temp);
-
                 LevelToLoadInfo levelInfo = FindObjectOfType<LevelToLoadInfo>();
                 levelInfo.SetLevelSprite(levelsSprites[temp]);
 
@@ -75,10 +73,10 @@ public class MainMenuUI : UIInputHandler
     {
         base.OnEnable();
 
-        OnReturnButtonPressed += MainMenuUI_OnReturnButtonPressed;
+        OnPauseButtonPressed += MainMenuUI_OnPauseButtonPressed;
     }
 
-    private void MainMenuUI_OnReturnButtonPressed(object sender, System.EventArgs e)
+    private void MainMenuUI_OnPauseButtonPressed(object sender, System.EventArgs e)
     {
         if(_levelsMenu.activeSelf)
         {
@@ -90,6 +88,6 @@ public class MainMenuUI : UIInputHandler
     {
         base.OnDisable();
 
-        OnReturnButtonPressed -= MainMenuUI_OnReturnButtonPressed;
+        OnPauseButtonPressed -= MainMenuUI_OnPauseButtonPressed;
     }
 }

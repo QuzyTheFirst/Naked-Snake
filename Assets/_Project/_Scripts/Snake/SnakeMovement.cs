@@ -98,7 +98,6 @@ public class SnakeMovement : PlayerInputHandler
     {
         while (_snakeState == SnakeState.Alive)
         {
-            _inGameUI.StartProgressBarAnimation((float)_currentMoveEach_ms * .001f);
             yield return new WaitForSeconds(_currentMoveEach_ms * .001f);
 
             // Finding Next Tile

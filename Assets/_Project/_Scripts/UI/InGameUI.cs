@@ -8,7 +8,6 @@ using UnityEngine.EventSystems;
 public class InGameUI : UIInputHandler
 {
     [Header("Properties")]
-    [SerializeField] private Slider _stepProgressBar;
     [SerializeField] private TextMeshProUGUI _applesTextField;
     [SerializeField] private GameObject _shiftText;
 
@@ -99,39 +98,12 @@ public class InGameUI : UIInputHandler
         EventSystem.current.SetSelectedGameObject(null);
         _isDeathMenuActivated = false;
     }
-
-    public void StartProgressBarAnimation(float time)
-    {
-        if (_stepProgressBarCoroutine != null)
-        {
-            StopCoroutine(_stepProgressBarCoroutine);
-        }
-        
-        _stepProgressBarCoroutine = StartCoroutine(ProgressBarAnimation(time));
-    }
-
-    
-    public IEnumerator ProgressBarAnimation(float time)
-    {
-        float timer = 0;
-        while (timer < time)
-        {
-            yield return new WaitForEndOfFrame();
-            timer += Time.deltaTime;
-
-            float progress = timer / time;
-            _stepProgressBar.value = progress;;
-        }
-
-        _stepProgressBar.value = 1;
-    }
     
     protected  override void OnEnable()
     {
         base.OnEnable();
         
         OnPauseButtonPressed += InGameUI_OnPauseButtonPressed;
-        OnReturnButtonPressed += InGameUI_OnReturnButtonPressed;
         FruitsCollector.OnCollectedFruitAmountChanged += FruitsCollector_OnCollectedFruitAmountChanged;
     }
 
@@ -143,7 +115,6 @@ public class InGameUI : UIInputHandler
 
     private void InGameUI_OnPauseButtonPressed(object sender, EventArgs e)
     {
-        Debug.Log("Trying to open pause menu");
         if (_isDeathMenuActivated)
             return;
         
@@ -159,25 +130,11 @@ public class InGameUI : UIInputHandler
         SoundManager.Instance.Play("ButtonClick");
     }
 
-
-    private void InGameUI_OnReturnButtonPressed(object sender, EventArgs e)
-    {
-        Debug.Log("Trying to open pause menu");
-        if (_isDeathMenuActivated)
-            return;
-
-        if (_gameStateController.CurrentGameState == GameStateController.GameState.Paused)
-        {
-            _gameStateController.ContinueGame();
-        }
-        SoundManager.Instance.Play("ButtonClick");
-    }
-
     protected override void OnDisable()
     {
         base.OnDisable();
 
         OnPauseButtonPressed -= InGameUI_OnPauseButtonPressed;
-        FruitsCollector.OnCollectedFruitAmountChanged += FruitsCollector_OnCollectedFruitAmountChanged;
+        FruitsCollector.OnCollectedFruitAmountChanged -= FruitsCollector_OnCollectedFruitAmountChanged;
     }
 }

@@ -35,22 +35,13 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Return"",
-                    ""type"": ""Button"",
-                    ""id"": ""40a5b2ec-7396-4ac1-bd5e-963751a82df8"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
                 {
                     ""name"": """",
                     ""id"": ""ba9fdc84-1704-46e4-94b0-e63df46e09f0"",
-                    ""path"": ""<Keyboard>/escape"",
+                    ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
@@ -71,23 +62,12 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""cc0db3bd-d577-4aee-a8e6-df1867324813"",
-                    ""path"": ""<Keyboard>/escape"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Return"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""1907f26e-93f6-4af2-ae3b-7fec05e87933"",
+                    ""id"": ""ec8ec51c-6315-44ea-99be-014d40585906"",
                     ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Return"",
+                    ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -122,7 +102,6 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
         // Map
         m_Map = asset.FindActionMap("Map", throwIfNotFound: true);
         m_Map_Pause = m_Map.FindAction("Pause", throwIfNotFound: true);
-        m_Map_Return = m_Map.FindAction("Return", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -185,13 +164,11 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Map;
     private List<IMapActions> m_MapActionsCallbackInterfaces = new List<IMapActions>();
     private readonly InputAction m_Map_Pause;
-    private readonly InputAction m_Map_Return;
     public struct MapActions
     {
         private @UIControls m_Wrapper;
         public MapActions(@UIControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Pause => m_Wrapper.m_Map_Pause;
-        public InputAction @Return => m_Wrapper.m_Map_Return;
         public InputActionMap Get() { return m_Wrapper.m_Map; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -204,9 +181,6 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
-            @Return.started += instance.OnReturn;
-            @Return.performed += instance.OnReturn;
-            @Return.canceled += instance.OnReturn;
         }
 
         private void UnregisterCallbacks(IMapActions instance)
@@ -214,9 +188,6 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
-            @Return.started -= instance.OnReturn;
-            @Return.performed -= instance.OnReturn;
-            @Return.canceled -= instance.OnReturn;
         }
 
         public void RemoveCallbacks(IMapActions instance)
@@ -255,6 +226,5 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
     public interface IMapActions
     {
         void OnPause(InputAction.CallbackContext context);
-        void OnReturn(InputAction.CallbackContext context);
     }
 }

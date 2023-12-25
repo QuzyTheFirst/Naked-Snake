@@ -13,22 +13,13 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "Return",
-                    "type": "Button",
-                    "id": "40a5b2ec-7396-4ac1-bd5e-963751a82df8",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
                 {
                     "name": "",
                     "id": "ba9fdc84-1704-46e4-94b0-e63df46e09f0",
-                    "path": "<Keyboard>/escape",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
@@ -49,23 +40,12 @@
                 },
                 {
                     "name": "",
-                    "id": "cc0db3bd-d577-4aee-a8e6-df1867324813",
-                    "path": "<Keyboard>/escape",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Return",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "1907f26e-93f6-4af2-ae3b-7fec05e87933",
+                    "id": "ec8ec51c-6315-44ea-99be-014d40585906",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Return",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

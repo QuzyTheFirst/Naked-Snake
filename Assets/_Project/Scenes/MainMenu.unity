@@ -1219,7 +1219,7 @@ MonoBehaviour:
 
     Shift - speed boost
 
-    Escape
+    Tab
     - pause'
 --- !u!222 &961373843
 CanvasRenderer:
