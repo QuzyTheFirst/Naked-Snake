@@ -54,6 +54,8 @@ public class SnakeMovement : PlayerInputHandler
     private static float _leanTweenTransitionTime = .1f;
     public static float LeanTweenTransitionTime => _leanTweenTransitionTime;
 
+    private LeanTweenType _leanTweenType = LeanTweenType.easeInSine;
+
     public void Initialize(GridsManipulator gridsManipulator, GridTile gridTile, Transform snakeParent, InGameUI inGameUI, SnakeExploder snakeExploder)
     {
         _gridsManipulator = gridsManipulator;
@@ -140,9 +142,9 @@ public class SnakeMovement : PlayerInputHandler
             
             Vector3 newSnakePosition =
                 new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
-                Vector3.up;
+                Vector3.up * 0.25f;
             //transform.position = newSnakePosition;
-            LeanTween.cancel(gameObject);
+            //LeanTween.cancel(gameObject);
             LeanTween.move(gameObject, newSnakePosition, _leanTweenTransitionTime).setOnComplete(() =>
             {
                 SoundManager.Instance.Play("Footstep");
@@ -260,7 +262,8 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Right;
-        transform.rotation = Quaternion.LookRotation(Vector3.right);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, 90, 0), .1f).setEase(_leanTweenType);
+        //transform.rotation = Quaternion.LookRotation(Vector3.right);
     }
 
     private void SnakeHead_OnLeftPressed(object sender, EventArgs e)
@@ -269,7 +272,8 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Left;
-        transform.rotation = Quaternion.LookRotation(Vector3.left);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, -90, 0), .1f).setEase(_leanTweenType);
+        //transform.rotation = Quaternion.LookRotation(Vector3.left);
     }
 
     private void SnakeHead_OnDownPressed(object sender, EventArgs e)
@@ -278,7 +282,8 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Down;
-        transform.rotation = Quaternion.LookRotation(Vector3.back);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, 180, 0), .1f).setEase(_leanTweenType);
+        //transform.rotation = Quaternion.LookRotation(Vector3.back);
     }
 
     private void SnakeHead_OnUpPressed(object sender, EventArgs e)
@@ -287,7 +292,8 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Up;
-        transform.rotation = Quaternion.LookRotation(Vector3.forward);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, 0, 0), .1f).setEase(_leanTweenType);
+        //transform.rotation = Quaternion.LookRotation(Vector3.forward);
     }
 
     protected override void OnDisable()

@@ -27,7 +27,7 @@ public class FruitSpawner : MonoBehaviour
         if (tile == null) 
             throw new Exception("Walkable Tile Wasn't found");
         
-        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * 0.25f;
         Transform fruit = Instantiate(_fruitPf, spawnPos, _fruitPf.rotation,transform);
 
         GridTransformItem item = new GridTransformItem();

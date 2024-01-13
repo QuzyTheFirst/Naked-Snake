@@ -53,6 +53,7 @@ public class GameStateController : MonoBehaviour
     private  void SnakeMovementOnOnSnakeDeath(object sender, EventArgs e)
     {
         _inGameUI.ActivateDeathMenu();
+        _inGameUI.ToggleShiftText(false);
         _inGameUI.SetDeathMenuText($"Game Over!\nIs your snake on a diet?\nYou have eaten just {_fruitCollector.CollectedFruits} fruit(s)!\nTry to feed it more!");
         _currentGameState = GameState.Lost;
         SoundManager.Instance.Play("LostSound");

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class SnakeBodyController : MonoBehaviour
 {
@@ -20,6 +21,9 @@ public class SnakeBodyController : MonoBehaviour
     private Vector3 _standardSnakeBodySize;
 
     public IReadOnlyList<SnakeBody> SpawnedSnakeBodies => _spawnedSnakeBodies;
+
+
+    private LeanTweenType _leanTweenType = LeanTweenType.easeOutSine;
 
     public void Initialize(Transform snakeParent, GridsManipulator gridsManipulator, GridTile snakeHeadGridTile)
     {
@@ -63,8 +67,8 @@ public class SnakeBodyController : MonoBehaviour
 
             //body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
 
-            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
-            LeanTween.cancel(body.Transform.gameObject);
+            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * 0.25f;
+            //LeanTween.cancel(body.Transform.gameObject);
             LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
 
             body.SetGridPosition(tile.X, tile.Y);
@@ -79,7 +83,7 @@ public class SnakeBodyController : MonoBehaviour
         Transform body = Instantiate(_snakeBodyPf, _snakeParent);
         GridTile tile = _lastSnakeGridTiles[_lastSnakeGridTiles.Length - 1];
         SnakeBody snakeBody = new SnakeBody(tile.X, tile.Y, body);
-        body.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+        body.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * 0.25f;
 
         _spawnedSnakeBodies.Add(snakeBody);
         _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
@@ -124,15 +128,19 @@ public class SnakeBodyController : MonoBehaviour
 
             if (directionFromPreviousToNextBody == Vector2.zero)
             {
-                Vector3 worldLookRotationVector =
-                    new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
-                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+                float angle = Mathf.Atan2(previousBodyDirection.y, previousBodyDirection.x) * Mathf.Rad2Deg - 90;
+                LeanTween.rotate(body.Transform.gameObject, new Vector3(0, angle, 0), .2f).setEase(_leanTweenType);;
+                
+                //Vector3 worldLookRotationVector = new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
+                //body.Transform.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }
             else
             {
-                Vector3 worldLookRotationVector = new Vector3(-directionFromPreviousToNextBody.x, 0,
-                    directionFromPreviousToNextBody.y);
-                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+                float angle = Mathf.Atan2(directionFromPreviousToNextBody.y, directionFromPreviousToNextBody.x) * Mathf.Rad2Deg - 90;
+                LeanTween.rotate(body.Transform.gameObject, new Vector3(0, angle, 0), .2f).setEase(_leanTweenType);;
+                
+                //Vector3 worldLookRotationVector = new Vector3(-directionFromPreviousToNextBody.x, 0,directionFromPreviousToNextBody.y);
+                //body.Transform.rotation = Quaternion.LookRotation(worldLookRotationVector);
             }
         }
 
@@ -140,9 +148,11 @@ public class SnakeBodyController : MonoBehaviour
         {
             Vector2 previousBodyDirection = previousBody.GridPosition - body.GridPosition;
 
-            Vector3 worldLookRotationVector =
-                new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
-            body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+            float angle = Mathf.Atan2(previousBodyDirection.y, previousBodyDirection.x) * Mathf.Rad2Deg - 90;
+            LeanTween.rotate(body.Transform.gameObject, new Vector3(0, angle, 0), .2f).setEase(_leanTweenType);;
+            
+            //Vector3 worldLookRotationVector = new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
+            //body.Transform.rotation = Quaternion.LookRotation(worldLookRotationVector);
         }
 
         if (previousBody == null && nextBody != null)
@@ -154,26 +164,33 @@ public class SnakeBodyController : MonoBehaviour
 
             if (directionFromPreviousToNextBody == Vector2.zero)
             {
-                Vector3 worldLookRotationVector =
-                    new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
-                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+                //Vector3 worldLookRotationVector = new Vector3(previousBodyDirection.x, 0f, previousBodyDirection.y);
+                //body.Transform.rotation = Quaternion.LookRotation(worldLookRotationVector);
+                float angle = Mathf.Atan2(previousBodyDirection.y, previousBodyDirection.x) * Mathf.Rad2Deg - 90;
+                LeanTween.rotate(body.Transform.gameObject, new Vector3(0, angle, 0), .2f).setEase(_leanTweenType);;
             }
             else
             {
-                Vector3 worldLookRotationVector = new Vector3(-directionFromPreviousToNextBody.x, 0,
-                    directionFromPreviousToNextBody.y);
-                body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+                //Vector3 worldLookRotationVector = new Vector3(-directionFromPreviousToNextBody.x, 0, directionFromPreviousToNextBody.y);
+                //body.Transform.rotation = Quaternion.LookRotation(worldLookRotationVector);
+                float angle = Mathf.Atan2(directionFromPreviousToNextBody.y, directionFromPreviousToNextBody.x) * Mathf.Rad2Deg - 90;
+                LeanTween.rotate(body.Transform.gameObject, new Vector3(0, angle, 0), .2f).setEase(_leanTweenType);;
             }
         }
 
         if (previousBody == null && nextBody == null)
         {
             Vector2 headPos = new Vector2(_snakeHeadGridTile.X, _snakeHeadGridTile.Y);
-            Vector2 snakeHeadDirection = headPos - body.GridPosition;
+            Vector2 snakeHeadDirection = (headPos - body.GridPosition).normalized;
 
+            float angle = Mathf.Atan2(snakeHeadDirection.y, snakeHeadDirection.x) * Mathf.Rad2Deg - 90;
+            
             Vector3 worldLookRotationVector =
                 new Vector3(snakeHeadDirection.x, 0f, snakeHeadDirection.y);
-            body.SpineThing.rotation = Quaternion.LookRotation(worldLookRotationVector);
+            
+            //LeanTween.cancel(body.Transform.gameObject);
+            LeanTween.rotate(body.Transform.gameObject, new Vector3(0, angle, 0), .2f).setEase(_leanTweenType);
+            //body.Transform.rotation = Quaternion.LookRotation(worldLookRotationVector);
         }
     }
 

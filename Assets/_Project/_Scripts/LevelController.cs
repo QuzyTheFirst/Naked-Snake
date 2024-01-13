@@ -64,7 +64,7 @@ public class LevelController : MonoBehaviour
         _fruitSpawner.SpawnFruit();
 
         GridTile tile = _gridsManipulator.GridTiles.GetRandomSpawnTile();
-        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
+        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * .25f;
 
         SnakeMovement snakeMovement = Instantiate(_snakePf, spawnPos, Quaternion.identity, _snakeParent)
             .GetComponent<SnakeMovement>();
