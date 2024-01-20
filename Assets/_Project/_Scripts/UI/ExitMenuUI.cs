@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class ExitMenuUI : MonoBehaviour
 {
-    private SceneController _sceneController;
+    private LevelLoader _levelLoader;
 
-    public void Initialize(SceneController sceneController)
+    public void Initialize(LevelLoader levelLoader)
     {
-        _sceneController = sceneController;
+        _levelLoader = levelLoader;
     }
     
     public void MainMenuBtn()
     {
-        _sceneController.LoadMainMenu();
+        _levelLoader.LoadMainMenu();
     }
 
     public void ExitGameBtn()

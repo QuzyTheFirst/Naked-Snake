@@ -5,11 +5,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelEditorUI : MonoBehaviour
+public class LevelEditorUI : UIInputHandler
 {
     [SerializeField] private LevelEditor _levelEditor;
     [SerializeField] private TextMeshProUGUI _errorLogger;
     [SerializeField] private GameObject[] _saveLoadButtons;
+
+    private LevelLoader _levelLoader;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 
@@ -23,13 +25,18 @@ public class LevelEditorUI : MonoBehaviour
 
 #endif
 
+    public void Initialize(LevelLoader levelLoader)
+    {
+        _levelLoader = levelLoader;
+    }
+    
     public void Play()
     {
         try
         {
             LevelToLoadInfo levelToLoadInfo = FindObjectOfType<LevelToLoadInfo>();
             _levelEditor.TrySetupLevelToLoadInfo(levelToLoadInfo);
-            SceneManager.LoadScene(2);
+            _levelLoader.LoadGameScene();
         }
         catch (Exception ex)
         {
@@ -64,11 +71,30 @@ public class LevelEditorUI : MonoBehaviour
 
     public void Eraser()
     {
-        _levelEditor.ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Empty);
+        _levelEditor.ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Eraser);
     }
 
     public void ExitLevelEditor()
     {
-        SceneManager.LoadScene(0);
+        _levelLoader.LoadMainMenu();
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        
+        OnPauseButtonPressed += LevelEditorUI_OnPauseButtonPressed;
+    }
+
+    private void LevelEditorUI_OnPauseButtonPressed(object sender, EventArgs e)
+    {
+        ExitLevelEditor();
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        
+        OnPauseButtonPressed -= LevelEditorUI_OnPauseButtonPressed;
     }
 }

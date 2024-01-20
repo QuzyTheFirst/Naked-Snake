@@ -22,19 +22,19 @@ public class InGameUI : UIInputHandler
     [SerializeField] private GameObject _pauseMenuFirst;
     [SerializeField] private GameObject _deathMenuFirst;
 
-    private SceneController _sceneController;
+    private LevelLoader _levelLoader;
     private GameStateController _gameStateController;
-    private LevelController _levelChanger;
+    private MapController _mapChanger;
 
     private Coroutine _stepProgressBarCoroutine;
 
     private bool _isDeathMenuActivated = false;
 
-    public void Initialize(SceneController sceneController, GameStateController gameStateController, LevelController levelChanger)
+    public void Initialize(LevelLoader levelLoader, GameStateController gameStateController, MapController mapChanger)
     {
-        _sceneController = sceneController;
+        _levelLoader = levelLoader;
         _gameStateController = gameStateController;
-        _levelChanger = levelChanger;
+        _mapChanger = mapChanger;
     }
 
     public void ContinueBtn()
@@ -45,13 +45,13 @@ public class InGameUI : UIInputHandler
 
     public void MainMenuBtn()
     {
-        _sceneController.LoadMainMenu();
+        _levelLoader.LoadMainMenu();
         SoundManager.Instance.Play("ButtonClick");
     }
 
     public void RestartBtn()
     {
-        _levelChanger.RestartLevel();
+        _mapChanger.RestartLevel();
         DeactivateDeathMenu();
         _gameStateController.ContinueGame();
         SoundManager.Instance.Play("ButtonClick");

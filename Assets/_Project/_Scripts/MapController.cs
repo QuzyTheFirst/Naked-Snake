@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class LevelController : MonoBehaviour
+public class MapController : MonoBehaviour
 {
     [Header("Snakes")]
     [SerializeField] private Transform _snakePf;
@@ -47,7 +47,7 @@ public class LevelController : MonoBehaviour
         _gameStateController = gameStateController;
     }
     
-    public bool TryCollectLevel(LevelToLoadInfo levelInfo)
+    public bool TryBuildLevel(LevelToLoadInfo levelInfo)
     {
         if (levelInfo == null)
             return false;
@@ -91,6 +91,6 @@ public class LevelController : MonoBehaviour
         if (_snakeMovement != null)
             _snakeMovement.DestroySnake();
 
-        TryCollectLevel(_currentLevelInfo);
+        TryBuildLevel(_currentLevelInfo);
     }
 }

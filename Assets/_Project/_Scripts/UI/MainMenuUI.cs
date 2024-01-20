@@ -14,11 +14,11 @@ public class MainMenuUI : UIInputHandler
     [SerializeField] private GameObject _mainMenuFirst;
     private GameObject _levelChooseMenuFirst;
 
-    private SceneController _sceneController;
+    private LevelLoader _levelLoader;
     
-    public void Initialize(SceneController sceneController, Sprite[] levelsSprites)
+    public void Initialize(LevelLoader levelLoader, Sprite[] levelsSprites)
     {
-        _sceneController = sceneController;
+        _levelLoader = levelLoader;
 
         GenerateLevelButtons(levelsSprites);
 
@@ -39,7 +39,7 @@ public class MainMenuUI : UIInputHandler
 
     public void OpenLevelEditor()
     {
-        _sceneController.LoadLevelEditor();
+        _levelLoader.LoadLevelEditor();
     }
     
     private void GenerateLevelButtons(Sprite[] levelsSprites)
@@ -64,7 +64,7 @@ public class MainMenuUI : UIInputHandler
 
                 SoundManager.Instance.Play("ButtonClick");
 
-                _sceneController.LoadGameScene();
+                _levelLoader.LoadGameScene();
             });
         }
     }

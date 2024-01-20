@@ -6,16 +6,17 @@ using UnityEngine.Serialization;
 
 public class GameEntryPoint : MonoBehaviour
 {
-    [SerializeField] private SceneController _sceneController;
     [SerializeField] private InGameUI _inGameUI;
     [SerializeField] private LevelGenerator _levelGenerator;
     [SerializeField] private GameStateController _gameStateController;
-    [SerializeField] private FruitSpawner _fruitSpawner;
-    [SerializeField] private LevelController _levelChanger;
+    [SerializeField] private FruitSpawner _fruitSpawner; 
+    [SerializeField] private MapController _mapController;
     [SerializeField] private CameraController _cameraController;
     [SerializeField] private SnakeExploder _snakeExploder;
     [SerializeField] private FruitsCollector _fruitsCollector;
 
+    private LevelLoader _levelLoader;
+    
     private GridTiles _gridTiles;
     private GridItems _gridItems;
     private GridSnakes _gridSnakes;
@@ -28,8 +29,10 @@ public class GameEntryPoint : MonoBehaviour
         _gridItems = new GridItems();
         _gridSnakes = new GridSnakes();
         _gridsManipulator = new GridsManipulator(_gridTiles, _gridSnakes, _gridItems);
+
+        _levelLoader = FindObjectOfType<LevelLoader>();
         
-        _levelChanger.Initialize(
+        _mapController.Initialize(
             _gridsManipulator,
             _levelGenerator,
             _fruitSpawner,
@@ -38,11 +41,11 @@ public class GameEntryPoint : MonoBehaviour
             _snakeExploder,
             _gameStateController,
             _fruitsCollector);
-        _inGameUI.Initialize(_sceneController, _gameStateController, _levelChanger);
+        _inGameUI.Initialize(_levelLoader, _gameStateController, _mapController);
         _fruitSpawner.Initialize(_gridsManipulator);
 
         LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
-        _levelChanger.TryCollectLevel(lvl);
+        _mapController.TryBuildLevel(lvl);
 
         _gameStateController.Initialize(_inGameUI, _fruitsCollector);
         _gameStateController.ContinueGame();

@@ -88,10 +88,30 @@ public class MeshUtils
         
         float heightTileBeginning = tileY * tileHeight - tileHeight;
         float heightTileEnding = tileY * tileHeight;
-
+        
         uvs[index * 4 + 0] = new Vector2(widthTileBeginning, heightTileBeginning);
         uvs[index * 4 + 1] = new Vector2(widthTileBeginning, heightTileEnding);
         uvs[index * 4 + 2] = new Vector2(widthTileEnding, heightTileEnding);
         uvs[index * 4 + 3] = new Vector2(widthTileEnding, heightTileBeginning);
+    }
+
+    public static void ChangeSquareGridUvsToCenterPoint(int index, int tilesNumberX, int tilesNumberY, int tileX, int tileY,  ref Vector2[] uvs)
+    {
+        float tileWidth = 1f / tilesNumberX;
+        float tileHeight = 1f / tilesNumberY;
+        
+        float widthTileBeginning = tileX * tileWidth - tileWidth;
+        float widthTileEnding = tileX * tileWidth;
+        float widthCenter = (widthTileBeginning + widthTileEnding) * 0.5f;
+        
+        float heightTileBeginning = tileY * tileHeight - tileHeight;
+        float heightTileEnding = tileY * tileHeight;
+        float heightCenter = (heightTileBeginning + heightTileEnding) * 0.5f;
+        
+        
+        uvs[index * 4 + 0] = new Vector2(widthCenter, heightCenter);
+        uvs[index * 4 + 1] = new Vector2(widthCenter, heightCenter);
+        uvs[index * 4 + 2] = new Vector2(widthCenter, heightCenter);
+        uvs[index * 4 + 3] = new Vector2(widthCenter, heightCenter);
     }
 }

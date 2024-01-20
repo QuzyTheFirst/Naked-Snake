@@ -54,17 +54,17 @@ public class LevelEditorVisual : MonoBehaviour
                 LevelEditorGrid.LevelEditorGridObject levelEditorGridObject = _grid.GetGridObject(x, y);
                 switch (levelEditorGridObject.GetTileType())
                 {
-                    case LevelEditorGrid.LevelEditorGridObject.TileType.Empty:
-                        MeshUtils.ChangeSquareGridUvs(index, 4, 1, 4, 1, ref uvs);
+                    case LevelEditorGrid.LevelEditorGridObject.TileType.Eraser:
+                        MeshUtils.ChangeSquareGridUvsToCenterPoint(index, 4, 1, 4, 1, ref uvs);
                         break;
                     case LevelEditorGrid.LevelEditorGridObject.TileType.Obstacle:
-                        MeshUtils.ChangeSquareGridUvs(index, 4, 1, 1, 1, ref uvs);
+                        MeshUtils.ChangeSquareGridUvsToCenterPoint(index, 4, 1, 1, 1, ref uvs);
                         break;
                     case LevelEditorGrid.LevelEditorGridObject.TileType.Spawnpoint:
-                        MeshUtils.ChangeSquareGridUvs(index, 4, 1, 2, 1, ref uvs);
+                        MeshUtils.ChangeSquareGridUvsToCenterPoint(index, 4, 1, 2, 1, ref uvs);
                         break;
                     case LevelEditorGrid.LevelEditorGridObject.TileType.Walkable:
-                        MeshUtils.ChangeSquareGridUvs(index, 4, 1, 3, 1, ref uvs);
+                        MeshUtils.ChangeSquareGridUvsToCenterPoint(index, 4, 1, 3, 1, ref uvs);
                         break;
                 }
             }

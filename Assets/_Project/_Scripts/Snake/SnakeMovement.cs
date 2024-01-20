@@ -262,7 +262,7 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Right;
-        LeanTween.rotate(transform.gameObject, new Vector3(0, 90, 0), .1f).setEase(_leanTweenType);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, 90, 0), .05f).setEase(_leanTweenType);
         //transform.rotation = Quaternion.LookRotation(Vector3.right);
     }
 
@@ -272,7 +272,7 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Left;
-        LeanTween.rotate(transform.gameObject, new Vector3(0, -90, 0), .1f).setEase(_leanTweenType);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, -90, 0), .05f).setEase(_leanTweenType);
         //transform.rotation = Quaternion.LookRotation(Vector3.left);
     }
 
@@ -282,7 +282,7 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Down;
-        LeanTween.rotate(transform.gameObject, new Vector3(0, 180, 0), .1f).setEase(_leanTweenType);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, 180, 0), .05f).setEase(_leanTweenType);
         //transform.rotation = Quaternion.LookRotation(Vector3.back);
     }
 
@@ -292,7 +292,7 @@ public class SnakeMovement : PlayerInputHandler
             return;
 
         _movementDirection = MovementDirection.Up;
-        LeanTween.rotate(transform.gameObject, new Vector3(0, 0, 0), .1f).setEase(_leanTweenType);
+        LeanTween.rotate(transform.gameObject, new Vector3(0, 0, 0), .05f).setEase(_leanTweenType);
         //transform.rotation = Quaternion.LookRotation(Vector3.forward);
     }
 

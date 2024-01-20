@@ -23,7 +23,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         _playerInputs.Enable();
         
-        _playerInputs.Map.UP.performed+= OnUpPerformed;
+        _playerInputs.Map.UP.performed += OnUpPerformed;
         _playerInputs.Map.DOWN.performed += OnDownPerformed;
         _playerInputs.Map.RIGHT.performed += OnRightPerformed;
         _playerInputs.Map.LEFT.performed += OnLeftPerformed;

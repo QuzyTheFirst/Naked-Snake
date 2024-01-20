@@ -4,7 +4,15 @@ using UnityEngine;
 
 public class UtilsClass
 {
-    public static Vector3 GetMouseWorldPosition(int distanceFromCamera)
+    public static Vector3 GetMouseWorldPosition(Vector3 screenPosition, float distanceFromCamera)
+    {
+        Vector3 searchPlane = screenPosition + new Vector3(0, 0, distanceFromCamera);
+        Vector3 vec = GetMousePositionWithZ(searchPlane, Camera.main);
+        vec.z = 0f;
+        return vec;
+    }
+    
+    public static Vector3 GetMouseWorldPosition(float distanceFromCamera)
     {
         Vector3 searchPlane = Input.mousePosition + new Vector3(0, 0, distanceFromCamera);
         Vector3 vec = GetMousePositionWithZ(searchPlane, Camera.main);

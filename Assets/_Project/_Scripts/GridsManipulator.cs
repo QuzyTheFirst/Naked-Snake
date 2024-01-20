@@ -37,7 +37,7 @@ public class GridsManipulator
 
     public List<GridTile> FindAllWalkableTilesWithoutSnakesAndFruits()
     {
-        List<GridTile> gridTiles = new List<GridTile>();
+        List<GridTile> gridTilesWithoutSnakesAndFruits = new List<GridTile>();
 
         for (int x = 0; x < _gridTiles.GridSize.x; x++)
         {
@@ -50,15 +50,15 @@ public class GridsManipulator
 
                 if (!CheckTileForSnake(x, y) && 
                     !CheckTileForFruit(x, y) &&
-                    tile.CurrentTileType == GridTile.TileType.WalkingTile)
+                    (tile.CurrentTileType == GridTile.TileType.WalkingTile || tile.CurrentTileType == GridTile.TileType.SpawnTile))
                 {
-                    gridTiles.Add(tile);
+                    gridTilesWithoutSnakesAndFruits.Add(tile);
                 }
                     
             }
         }
         
-        return gridTiles;
+        return gridTilesWithoutSnakesAndFruits;
     }
     
     public bool CheckTileForSnake(int x, int y)

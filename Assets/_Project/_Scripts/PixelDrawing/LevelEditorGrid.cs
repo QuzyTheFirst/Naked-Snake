@@ -59,7 +59,7 @@ public class LevelEditorGrid
                 }
                 else if (pixel == Color.clear)
                 {
-                    gridObject.SetTileType(LevelEditorGridObject.TileType.Empty);
+                    gridObject.SetTileType(LevelEditorGridObject.TileType.Eraser);
                 }
             }
         }
@@ -72,7 +72,7 @@ public class LevelEditorGrid
             Obstacle,
             Walkable,
             Spawnpoint,
-            Empty,
+            Eraser,
         }
 
         private TileType _tileType;
@@ -84,7 +84,7 @@ public class LevelEditorGrid
 
         public LevelEditorGridObject(Grid<LevelEditorGridObject> grid, int x, int y)
         {
-            _tileType = TileType.Empty;
+            _tileType = TileType.Eraser;
             _grid = grid;
             _x = x;
             _y = y;

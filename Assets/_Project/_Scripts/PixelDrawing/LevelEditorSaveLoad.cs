@@ -59,7 +59,7 @@ public class LevelEditorSaveLoad
                 LevelEditorGrid.LevelEditorGridObject levelEditorGridObject = _grid.GetGridObject(x, y);
                 switch (levelEditorGridObject.GetTileType())
                 {
-                    case LevelEditorGrid.LevelEditorGridObject.TileType.Empty:
+                    case LevelEditorGrid.LevelEditorGridObject.TileType.Eraser:
                         texture2D.SetPixel(x, y, Color.clear);
                         break;
                     case LevelEditorGrid.LevelEditorGridObject.TileType.Obstacle:

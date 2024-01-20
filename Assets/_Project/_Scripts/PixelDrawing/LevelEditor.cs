@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class LevelEditor : MonoBehaviour
+public class LevelEditor : LevelEditorInputHandler
 {
     [SerializeField] private LevelEditorVisual _levelEditorVisuals;
     [SerializeField] private float _cellSize = 1;
@@ -15,8 +17,12 @@ public class LevelEditor : MonoBehaviour
     
     private LevelEditorGrid.LevelEditorGridObject.TileType _currentBrushType;
 
-    private void Awake()
+    private Coroutine _drawingCoroutine;
+
+    protected override void Awake()
     {
+        base.Awake();
+        
         _levelEditorGrid = new LevelEditorGrid(20, 20 , _cellSize, _originPosition);
         _levelEditorSaveLoad = new LevelEditorSaveLoad();
         _levelEditorMapRulesChecker = new LevelEditorMapRulesChecker();
@@ -75,33 +81,80 @@ public class LevelEditor : MonoBehaviour
         }
     }
     
-    private void Update()
+    protected override void OnEnable()
     {
-        if(Input.GetMouseButton(0))
+        base.OnEnable();
+        
+        OnObstaclePerformed +=LevelEditor_OnObstaclePerformed;
+        OnSpawnpointPerformed += LevelEditor_OnSpawnpointPerformed;
+        OnWalkablePerformed += LevelEditor_OnWalkablePerformed;
+        OnEraserPerformed += LevelEditor_OnEraserPerformed;
+        
+        OnMousePerformed += LevelEditor_OnMousePerformed;
+        OnMouseCanceled += LevelEditor_OnMouseCanceled;
+    }
+
+    private void LevelEditor_OnObstaclePerformed(object sender, EventArgs e)
+    {
+        ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Obstacle);
+    }
+
+    private void LevelEditor_OnSpawnpointPerformed(object sender, EventArgs e)
+    {
+        ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Spawnpoint);
+    }
+
+    private void LevelEditor_OnWalkablePerformed(object sender, EventArgs e)
+    {
+        ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Walkable);
+    }
+
+    private void LevelEditor_OnEraserPerformed(object sender, EventArgs e)
+    {
+        ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Eraser);
+    }
+    
+    private void LevelEditor_OnMousePerformed(object sender, EventArgs e)
+    {
+        _drawingCoroutine = StartCoroutine(MouseDrawing());
+    }
+
+    IEnumerator MouseDrawing()
+    {
+        while (true)
         {
-            Vector2 mousePosition = UtilsClass.GetMouseWorldPosition(10);
-            LevelEditorGrid.LevelEditorGridObject gridObject = _levelEditorGrid.GetLevelEditorTile(mousePosition);
+            Vector3 mousePosition = Mouse.current.position.ReadValue();
+            Vector2 mouseWorldPosition = UtilsClass.GetMouseWorldPosition(mousePosition,10);
+            
+            LevelEditorGrid.LevelEditorGridObject gridObject = _levelEditorGrid.GetLevelEditorTile(mouseWorldPosition);
             if (gridObject == null || gridObject.GetTileType() == _currentBrushType)
-                return;
+            {
+                yield return null;
+                continue;
+            }
+
             gridObject.SetTileType(_currentBrushType);
             _lastLevelGridObject = gridObject;
+            
+            yield return null;
         }
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Obstacle);
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Spawnpoint);
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Walkable);
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ChangeBrushType(LevelEditorGrid.LevelEditorGridObject.TileType.Empty);
-        }
+    }
+    
+    private void LevelEditor_OnMouseCanceled(object sender, EventArgs e)
+    {
+        StopCoroutine(_drawingCoroutine);
+    }
+    
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        
+        OnObstaclePerformed -= LevelEditor_OnObstaclePerformed;
+        OnSpawnpointPerformed -= LevelEditor_OnSpawnpointPerformed;
+        OnWalkablePerformed -= LevelEditor_OnWalkablePerformed;
+        OnEraserPerformed -= LevelEditor_OnEraserPerformed;
+        
+        OnMousePerformed -= LevelEditor_OnMousePerformed;
+        OnMouseCanceled -= LevelEditor_OnMouseCanceled;
     }
 }
