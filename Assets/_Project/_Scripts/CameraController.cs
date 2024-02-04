@@ -12,13 +12,13 @@ public class CameraController : MonoBehaviour
         _cam = GetComponent<Camera>();
     }
 
-    public void SetNewCameraPos(int gridSizeX, int gridSizeY)
+    public void SetupCamera(int gridSizeX, int gridSizeY, float cellSize, Vector3 originPosition)
     {
-        Vector3 center = new Vector3(gridSizeX * .5f, 10, gridSizeY * .5f) - (Vector3.one * .5f);
-        transform.position = center * LevelGenerator.DistanceBetweenTiles;
+        Vector3 center = new Vector3(gridSizeX * cellSize * .5f, 10, gridSizeY * cellSize * .5f) - new Vector3(cellSize * 0.5f, 0 , cellSize * 0.5f) + originPosition;
+        transform.position = center;
 
-        float bottomLineX = gridSizeX * .5f * LevelGenerator.DistanceBetweenTiles;
-        float bottomLineY = gridSizeY * .5f * LevelGenerator.DistanceBetweenTiles;
+        float bottomLineX = gridSizeX * cellSize * .5f;
+        float bottomLineY = gridSizeY * cellSize * .5f;
         float bottomLine = bottomLineX > bottomLineY ? bottomLineX : bottomLineY;
 
         float hipotenuza = Mathf.Sqrt(bottomLine * bottomLine);

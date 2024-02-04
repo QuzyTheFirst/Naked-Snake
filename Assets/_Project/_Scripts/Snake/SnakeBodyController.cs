@@ -67,7 +67,7 @@ public class SnakeBodyController : MonoBehaviour
 
             //body.Transform.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up;
 
-            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * 0.25f;
+            Vector3 targetPos = new Vector3(tile.X, 0, tile.Y) + Vector3.up * 0.25f;
             //LeanTween.cancel(body.Transform.gameObject);
             LeanTween.move(body.Transform.gameObject, targetPos, SnakeMovement.LeanTweenTransitionTime);
 
@@ -83,7 +83,7 @@ public class SnakeBodyController : MonoBehaviour
         Transform body = Instantiate(_snakeBodyPf, _snakeParent);
         GridTile tile = _lastSnakeGridTiles[_lastSnakeGridTiles.Length - 1];
         SnakeBody snakeBody = new SnakeBody(tile.X, tile.Y, body);
-        body.position = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * 0.25f;
+        body.position = new Vector3(tile.X, 0, tile.Y) + Vector3.up * 0.25f;
 
         _spawnedSnakeBodies.Add(snakeBody);
         _amountOfLastPlayerPositionsToSave = _spawnedSnakeBodies.Count + 1;
@@ -200,7 +200,7 @@ public class SnakeBodyController : MonoBehaviour
         {
             GridIntItem body = new GridIntItem();
             body.SetItem(snakeBody.GridPosition.x, snakeBody.GridPosition.y, 1);
-            _gridsManipulator.GridSnakes.TrySetTile(body);
+            //_gridsManipulator.GridSnakes.TrySetTile(body);
         }
     }
 

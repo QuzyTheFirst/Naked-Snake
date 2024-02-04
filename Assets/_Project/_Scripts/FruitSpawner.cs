@@ -17,7 +17,7 @@ public class FruitSpawner : MonoBehaviour
     
     public void SpawnFruit()
     {
-        List<GridTile> tiles = _gridsManipulator.FindAllWalkableTilesWithoutSnakesAndFruits();
+        List<GridTile> tiles = null;/*_gridsManipulator.FindAllWalkableTilesWithoutSnakesAndFruits();*/
         if (tiles.Count == 0)
             return;
         
@@ -27,12 +27,12 @@ public class FruitSpawner : MonoBehaviour
         if (tile == null) 
             throw new Exception("Walkable Tile Wasn't found");
         
-        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) * LevelGenerator.DistanceBetweenTiles + Vector3.up * 0.25f;
+        Vector3 spawnPos = new Vector3(tile.X, 0, tile.Y) + Vector3.up * 0.25f;
         Transform fruit = Instantiate(_fruitPf, spawnPos, _fruitPf.rotation,transform);
 
         GridTransformItem item = new GridTransformItem();
         item.SetItem(tile.X, tile.Y, fruit);
-        _gridsManipulator.GridItems.TrySetTile(item);
+        //_gridsManipulator.GridItems.TrySetTile(item);
     }
 
     public void DeleteAllFruits()
@@ -50,17 +50,17 @@ public class FruitSpawner : MonoBehaviour
 
     private void SnakeMovement_OnSnakeHitFruit(object sender, Vector2Int fruitPos)
     {
-        GridTransformItem gridItem = _gridsManipulator.GridItems.TryGetTile(fruitPos.x, fruitPos.y);
+        GridTransformItem gridItem = null; //_gridsManipulator.GridItems.TryGetTile(fruitPos.x, fruitPos.y);
 
         if (gridItem == null)
             return;
 
         Transform item = gridItem.Value;
 
-        if (_gridsManipulator.GridItems.TryClearTile(fruitPos.x, fruitPos.y) && item != null)
+        /*if (_gridsManipulator.GridItems.TryClearTile(fruitPos.x, fruitPos.y) && item != null)
         {
             Destroy(item.gameObject);
-        }
+        }*/
 
         SpawnFruit();
     }

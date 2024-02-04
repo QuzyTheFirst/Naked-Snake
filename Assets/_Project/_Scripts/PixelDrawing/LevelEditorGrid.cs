@@ -90,9 +90,9 @@ public class LevelEditorGrid
             _y = y;
         }
 
-        public void SetTileType(TileType tiletype)
+        public void SetTileType(TileType tileType)
         {
-            _tileType = tiletype;
+            _tileType = tileType;
             _grid.TriggerGridObjectChanged(_x, _y);
         }
 

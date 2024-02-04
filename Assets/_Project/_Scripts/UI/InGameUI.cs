@@ -51,7 +51,6 @@ public class InGameUI : UIInputHandler
 
     public void RestartBtn()
     {
-        _mapChanger.RestartLevel();
         DeactivateDeathMenu();
         _gameStateController.ContinueGame();
         SoundManager.Instance.Play("ButtonClick");

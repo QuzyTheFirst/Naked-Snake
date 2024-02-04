@@ -1,89 +1,119 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Random = UnityEngine.Random;
 
 public class GridsManipulator
 {
-    private GridTiles _gridTiles;
-    private GridSnakes _gridSnakes;
-    private GridItems _gridItems;
+    private MapTilesGrid _mapTilesGrid;
+    private SnakePartsGrid _snakePartsGrid;
+    private FruitsGrid _fruitsGrid;
 
-    public GridTiles GridTiles => _gridTiles;
-    public GridSnakes GridSnakes => _gridSnakes;
-    public GridItems GridItems => _gridItems;
-    
-    public GridsManipulator(GridTiles gridTiles, GridSnakes gridSnakes, GridItems gridItems)
+    private Dictionary<MapTilesGrid.MapTileGridObject.TileType, List<MapTilesGrid.MapTileGridObject>> _mapTilesDictionary;
+
+    public GridsManipulator(MapTilesGrid mapTilesGrid, SnakePartsGrid snakePartsGrid, FruitsGrid fruitsGrid)
     {
-        _gridTiles = gridTiles;
-        _gridSnakes = gridSnakes;
-        _gridItems = gridItems;
+        _mapTilesGrid = mapTilesGrid;
+        _snakePartsGrid = snakePartsGrid;
+        _fruitsGrid = fruitsGrid;
+
+        FillMapTilesDictionary();
     }
 
-    public void ResetGrids()
+    private void FillMapTilesDictionary()
     {
-        _gridTiles.ResetGrid();
-        _gridSnakes.ResetGrid();
-        _gridItems.ResetGrid();
-    }
-
-    public void SetGridsSize(int gridSizeX, int gridSizeY)
-    {
-        _gridTiles.SetGridSize(gridSizeX, gridSizeY);
-        _gridSnakes.SetGridSize(gridSizeX, gridSizeY);
-        _gridItems.SetGridSize(gridSizeX, gridSizeY);
-    }
-
-    public List<GridTile> FindAllWalkableTilesWithoutSnakesAndFruits()
-    {
-        List<GridTile> gridTilesWithoutSnakesAndFruits = new List<GridTile>();
-
-        for (int x = 0; x < _gridTiles.GridSize.x; x++)
+        _mapTilesDictionary =
+            new Dictionary<MapTilesGrid.MapTileGridObject.TileType, List<MapTilesGrid.MapTileGridObject>>();
+        
+        foreach (MapTilesGrid.MapTileGridObject.TileType tileType in Enum.GetValues(typeof(MapTilesGrid.MapTileGridObject.TileType)))
         {
-            for (int y = 0; y < _gridTiles.GridSize.y; y++)
-            {
-                GridTile tile = _gridTiles.TryGetTile(x, y);
-                
-                if(tile == null)
-                    continue;
-
-                if (!CheckTileForSnake(x, y) && 
-                    !CheckTileForFruit(x, y) &&
-                    (tile.CurrentTileType == GridTile.TileType.WalkingTile || tile.CurrentTileType == GridTile.TileType.SpawnTile))
-                {
-                    gridTilesWithoutSnakesAndFruits.Add(tile);
-                }
-                    
-            }
+            _mapTilesDictionary.Add(tileType, new List<MapTilesGrid.MapTileGridObject>());
         }
         
-        return gridTilesWithoutSnakesAndFruits;
+        for (int x = 0; x <= _mapTilesGrid.GetWidth(); x++)
+        {
+            for (int y = 0; y <= _mapTilesGrid.GetHeight(); y++)
+            {
+                MapTilesGrid.MapTileGridObject currentTile = _mapTilesGrid.GetMapTile(x, y);
+                
+                if(currentTile == null)
+                    continue;
+                
+                if (_mapTilesDictionary.ContainsKey(currentTile.GetTileType()))
+                {
+                    _mapTilesDictionary[currentTile.GetTileType()].Add(currentTile);
+                }
+            }
+        }
     }
     
-    public bool CheckTileForSnake(int x, int y)
-    {
-        GridIntItem snakeTile = _gridSnakes.TryGetTile(x, y);
-
-        if (snakeTile == null)
-            return false;
-        
-        if (snakeTile.Value != 1)
-            return false;
-        
-        return true;
-    }
-
     public bool CheckTileForFruit(int x, int y)
     {
-        GridTransformItem fruitTile = _gridItems.TryGetTile(x, y);
+        FruitsGrid.FruitGridObject fruitTile = _fruitsGrid.GetFruitTile(new Vector2(x, y));
+        return fruitTile.GetTileType() == FruitsGrid.FruitGridObject.TileTypeEnum.Fruit;
+    }
 
-        if (fruitTile == null)
-            return false;
+    public bool CheckTileForSnake(int x, int y)
+    {
+        SnakePartsGrid.SnakePartGridObject snakeTile = _snakePartsGrid.GetSnakePartTile(new Vector2(x, y));
+        return snakeTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead ||
+               snakeTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart;
+    }
+
+    public bool CheckTileForObstacle(int x, int y)
+    {
+        return _mapTilesGrid.GetMapTile(new Vector2(x, y)).GetTileType() ==
+               MapTilesGrid.MapTileGridObject.TileType.Obstacle;
+    }
+
+    public bool CheckTileForWalkableOrSpawnpoint(int x, int y)
+    {
+        MapTilesGrid.MapTileGridObject.TileType tileType = _mapTilesGrid.GetMapTile(x, y).GetTileType();
+
+        return tileType == MapTilesGrid.MapTileGridObject.TileType.Walkable ||
+               tileType == MapTilesGrid.MapTileGridObject.TileType.Spawnpoint;
+    }
+
+    public bool CheckTileForEmptyOrNull(int x, int y)
+    {
+        MapTilesGrid.MapTileGridObject tile = _mapTilesGrid.GetMapTile(x, y);
         
-        if (fruitTile.Value == null)
-            return false;
+        if (tile == null)
+            return true;
+
+        return tile.GetTileType() == MapTilesGrid.MapTileGridObject.TileType.Empty;
+    }
+
+    public MapTilesGrid.MapTileGridObject GetRandomSpawnpointTile()
+    {
+        List<MapTilesGrid.MapTileGridObject> spawnPoints =
+            _mapTilesDictionary[MapTilesGrid.MapTileGridObject.TileType.Spawnpoint];
         
-        return true;
+        int randomNumber = Random.Range(0, spawnPoints.Count);
+        return spawnPoints[randomNumber];
+    }
+
+    public MapTilesGrid.MapTileGridObject GetRandomWalkableOrSpawnpointTileWithoutSnake()
+    {
+        // Get All Acceptable tiles
+        List<MapTilesGrid.MapTileGridObject> allPossibleSpawnpoints =
+            _mapTilesDictionary[MapTilesGrid.MapTileGridObject.TileType.Spawnpoint];
+        allPossibleSpawnpoints.AddRange(_mapTilesDictionary[MapTilesGrid.MapTileGridObject.TileType.Walkable]);
+
+        // Remove Snake Tiles From This List
+        SnakePartsGrid.SnakePartGridObject currentSnakePart = null;//_snakePartsGrid.GetSnakeHead();
+        while (currentSnakePart != null)
+        {
+            Vector2Int coordinates = currentSnakePart.GetCoordinates();
+            allPossibleSpawnpoints.Remove(_mapTilesGrid.GetMapTile(coordinates.x, coordinates.y));
+            currentSnakePart = currentSnakePart.GetPreviousBody();
+        }
+
+        // Get Random Tile and Return;
+        int randomNumber = Random.Range(0, allPossibleSpawnpoints.Count);
+        return allPossibleSpawnpoints[randomNumber];
     }
 }

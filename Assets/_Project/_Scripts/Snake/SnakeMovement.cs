@@ -13,6 +13,7 @@ public struct SnakeMoveData
 
 public class SnakeMovement : PlayerInputHandler
 {
+    
     public static event EventHandler<Vector2Int> OnSnakeHitFruit;
     public static event EventHandler<SnakeMoveData> OnSnakeMoved;
     public static event EventHandler OnSnakeDeath;
@@ -105,8 +106,8 @@ public class SnakeMovement : PlayerInputHandler
             // Finding Next Tile
             Vector2Int nextTilePosition =
                 new Vector2Int(_currentGridTile.X, _currentGridTile.Y) + Get2DMovementDirection();
-            
-            GridTile nextTile = _gridsManipulator.GridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);
+
+            GridTile nextTile = null;/*_gridsManipulator.GridTiles.TryGetTile(nextTilePosition.x, nextTilePosition.y);*/
             GridTile oldTile = _currentGridTile;
             
             if (nextTile == null)
@@ -120,7 +121,7 @@ public class SnakeMovement : PlayerInputHandler
 
 
             // Changing Snake Position
-            _gridsManipulator.GridSnakes.ResetGrid();
+            //_gridsManipulator.GridSnakes.ResetGrid();
             
             // Shit started (dont touch)
             // Updates snake body first
@@ -141,7 +142,7 @@ public class SnakeMovement : PlayerInputHandler
             // Shit Ending
             
             Vector3 newSnakePosition =
-                new Vector3(_currentGridTile.X, 0, _currentGridTile.Y) * LevelGenerator.DistanceBetweenTiles +
+                new Vector3(_currentGridTile.X, 0, _currentGridTile.Y)  +
                 Vector3.up * 0.25f;
             //transform.position = newSnakePosition;
             //LeanTween.cancel(gameObject);
@@ -185,7 +186,7 @@ public class SnakeMovement : PlayerInputHandler
     {
         GridIntItem snake = new GridIntItem();
         snake.SetItem(_currentGridTile.X, _currentGridTile.Y, 1);
-        _gridsManipulator.GridSnakes.TrySetTile(snake);
+        //_gridsManipulator.GridSnakes.TrySetTile(snake);
     }
 
     private Vector2Int Get2DMovementDirection()

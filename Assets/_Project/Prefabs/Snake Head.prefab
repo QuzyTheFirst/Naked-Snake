@@ -9,8 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 58424461712138693}
-  - component: {fileID: 4830904722836427430}
-  - component: {fileID: 2717662349139450068}
   - component: {fileID: 1289827413131036527}
   - component: {fileID: 4278024838016180280}
   m_Layer: 0
@@ -36,34 +34,6 @@ Transform:
   - {fileID: 1380516253104769566}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4830904722836427430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7692816235195764270}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fcd827e2107fe841a2ce755e47506fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _normalMoveEach_ms: 400
-  _boostMoveEach_ms: 200
---- !u!114 &2717662349139450068
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7692816235195764270}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76179784cbb48ee45be2baf888887aa5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _snakeBodyPf: {fileID: 7520593516599055080, guid: 2a5460f30f287604dac069577681ebbf,
-    type: 3}
 --- !u!65 &1289827413131036527
 BoxCollider:
   m_ObjectHideFlags: 0

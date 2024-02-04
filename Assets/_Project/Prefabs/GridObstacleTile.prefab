@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8718217743806245326}
   - component: {fileID: 8718398346120520500}
   m_Layer: 0
-  m_Name: GridEndTile
+  m_Name: GridObstacleTile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

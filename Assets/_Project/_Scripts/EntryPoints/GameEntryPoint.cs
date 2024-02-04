@@ -6,48 +6,74 @@ using UnityEngine.Serialization;
 
 public class GameEntryPoint : MonoBehaviour
 {
-    [SerializeField] private InGameUI _inGameUI;
-    [SerializeField] private LevelGenerator _levelGenerator;
-    [SerializeField] private GameStateController _gameStateController;
-    [SerializeField] private FruitSpawner _fruitSpawner; 
-    [SerializeField] private MapController _mapController;
+    [Header("Grid")] 
+    [SerializeField] private float _cellSize;
+    [SerializeField] private Vector2 _originPosition;
+
+    [Header("Snake")] 
+    [SerializeField] private int _moveEach_ms = 400;
+    [SerializeField] private int _boostMoveEach_ms = 200;
+    
+    [Header("Dependencies")]
+    [SerializeField] private Sprite _testMap;
+    [SerializeField] private LevelGridGenerator _levelGridGenerator;
+    [SerializeField] private SnakeController _snakeController;
+    [SerializeField] private FruitController _fruitController;
     [SerializeField] private CameraController _cameraController;
-    [SerializeField] private SnakeExploder _snakeExploder;
-    [SerializeField] private FruitsCollector _fruitsCollector;
+
+    [Header("Visuals")] 
+    [SerializeField] private MapTilesVisual _mapTilesVisual;
+    [SerializeField] private SnakePartsVisual _snakePartsVisual;
+    [SerializeField] private FruitsVisual _fruitsVisual;
 
     private LevelLoader _levelLoader;
     
-    private GridTiles _gridTiles;
-    private GridItems _gridItems;
-    private GridSnakes _gridSnakes;
     private GridsManipulator _gridsManipulator;
-    
+
+    private void Awake()
+    {
+        _levelLoader = FindObjectOfType<LevelLoader>();
+    }
+
     private void Start()
     {
-        // Initializing Variables
-        _gridTiles = new GridTiles();
-        _gridItems = new GridItems();
-        _gridSnakes = new GridSnakes();
-        _gridsManipulator = new GridsManipulator(_gridTiles, _gridSnakes, _gridItems);
-
-        _levelLoader = FindObjectOfType<LevelLoader>();
-        
-        _mapController.Initialize(
-            _gridsManipulator,
-            _levelGenerator,
-            _fruitSpawner,
-            _cameraController,
-            _inGameUI,
-            _snakeExploder,
-            _gameStateController,
-            _fruitsCollector);
-        _inGameUI.Initialize(_levelLoader, _gameStateController, _mapController);
-        _fruitSpawner.Initialize(_gridsManipulator);
-
+        // Initialize Variables
         LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
-        _mapController.TryBuildLevel(lvl);
+        
+        // Check if there is level
+        /*if (lvl == null)
+            return;*/
+        
+        // Initialize Grids
+        //MapTilesGrid mapTilesGrid = _levelGenerator.GenerateLevel(lvl.LevelSprite.texture);
+        MapTilesGrid mapTilesGrid = _levelGridGenerator.GenerateLevel(_testMap.texture, _cellSize, _originPosition);
+        SnakePartsGrid snakePartsGrid = new SnakePartsGrid(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(),_cellSize, _originPosition);
+        FruitsGrid fruitsGrid = new FruitsGrid(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
+        
+        // Initialize Grids Manipulator
+        _gridsManipulator = new GridsManipulator(mapTilesGrid, snakePartsGrid, fruitsGrid);
+        
+        // Give SnakeController and FruitController their grids and GridsManipulator
+        _snakeController.Initialize(snakePartsGrid, _gridsManipulator, _moveEach_ms, _boostMoveEach_ms);
+        _fruitController.Initialize(fruitsGrid, _gridsManipulator);
+        
+        // Spawn Snake
+        _snakeController.SpawnSnakeHead();
+        // Spawn Fruit
+        _fruitController.SpawnFruit();
+        // Game Visuals
+        mapTilesGrid.SetMapTilesVisuals(_mapTilesVisual);
+        snakePartsGrid.SetSnakePartsVisuals(_snakePartsVisual);
+        fruitsGrid.SetFruitsGridVisuals(_fruitsVisual);
+        // Camera
+        _cameraController.SetupCamera(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
+        // Start Game
+        StartGame();
+    }
 
-        _gameStateController.Initialize(_inGameUI, _fruitsCollector);
-        _gameStateController.ContinueGame();
+    private void StartGame()
+    {
+        _snakeController.StartMoving();
+        Debug.Log("Snake Started Moving...");
     }
 }
