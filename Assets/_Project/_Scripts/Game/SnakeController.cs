@@ -16,7 +16,7 @@ public class SnakeController : PlayerInputHandler
     private MovementDirectionEnum _currentMovementDirection = MovementDirectionEnum.Up;
     private MovementDirectionEnum _lastStepMovementDirection;
     
-    public static event EventHandler OnSnakeHitFruit;
+    public static event EventHandler<Vector2Int> OnSnakeHitFruit;
     
     public static event EventHandler OnSnakeDeath;
 
@@ -39,6 +39,7 @@ public class SnakeController : PlayerInputHandler
     }
 
     private SnakePartsGrid.SnakePartGridObject _snakeHead;
+    private List<SnakePartsGrid.SnakePartGridObject> _snakeBodies;
     
     public enum SnakeState
     {
@@ -56,6 +57,8 @@ public class SnakeController : PlayerInputHandler
         _gridsManipulator = gridsManipulator;
         _moveEach_ms = moveEach_ms;
         _boostMoveEach_ms = boostMoveEach_ms;
+
+        _snakeBodies = new List<SnakePartsGrid.SnakePartGridObject>();
     }
 
     public void SpawnSnakeHead()
@@ -79,7 +82,7 @@ public class SnakeController : PlayerInputHandler
         
         SnakeMovingCoroutine = StartCoroutine(SnakeMovement());
     }
-
+    
     private IEnumerator SnakeMovement()
     {
         while (_snakeState == SnakeState.Alive)
@@ -96,17 +99,48 @@ public class SnakeController : PlayerInputHandler
             
             SnakePartsGrid.SnakePartGridObject nextTile =
                 _snakePartsGrid.GetSnakePartTile(nextSnakeHeadPos.x, nextSnakeHeadPos.y);
+
+            if (_gridsManipulator.CheckTileForSnake(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            {
+                _snakeState = SnakeState.Dead;
+                continue;
+            }
             
             _snakeHead.ClearSnakeTileParams();
             nextTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead, null, null);
             _snakeHead = nextTile;
+            
+            MoveSnakeBodies();
+
+            if (_gridsManipulator.CheckTileForObstacle(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            {
+                _snakeState = SnakeState.Dead;
+                continue;
+            }
+
+            if (_gridsManipulator.CheckTileForFruit(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            {
+                SpawnSnakeBody();
+            
+                OnSnakeHitFruit?.Invoke(this, new Vector2Int(nextSnakeHeadPos.x, nextSnakeHeadPos.y));
+            }
+            
             _lastStepMovementDirection = _currentMovementDirection;
-            Debug.Log("Snake Started Moving...2");
         }
         
-        Debug.Log("Snake is dead!");
+        OnSnakeDeath?.Invoke(this, EventArgs.Empty);
     }
 
+    private void SpawnSnakeBody()
+    {
+        
+    }
+    
+    private void MoveSnakeBodies()
+    {
+        
+    }
+    
     private Vector2Int Get2DMovementDirection()
     {
         switch (_currentMovementDirection)
@@ -125,7 +159,6 @@ public class SnakeController : PlayerInputHandler
 
             default:
                 return Vector2Int.zero;
-
         }
     }
 
@@ -147,7 +180,6 @@ public class SnakeController : PlayerInputHandler
                 
             default:
                 throw new Exception("Where are you even going?");
-                
         }
     }
     
@@ -175,7 +207,7 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnRightPressed(object sender, EventArgs e)
     {
-        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Left)
+        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Right)
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Right;
@@ -183,7 +215,7 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnLeftPressed(object sender, EventArgs e)
     {
-        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Right)
+        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Left)
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Left;
@@ -191,7 +223,7 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnDownPressed(object sender, EventArgs e)
     {
-        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Up)
+        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Down)
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Down;
@@ -199,7 +231,7 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnUpPressed(object sender, EventArgs e)
     {
-        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Down)
+        if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Up)
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Up;

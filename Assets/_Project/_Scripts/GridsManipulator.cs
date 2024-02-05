@@ -52,20 +52,20 @@ public class GridsManipulator
     
     public bool CheckTileForFruit(int x, int y)
     {
-        FruitsGrid.FruitGridObject fruitTile = _fruitsGrid.GetFruitTile(new Vector2(x, y));
+        FruitsGrid.FruitGridObject fruitTile = _fruitsGrid.GetFruitTile(x, y);
         return fruitTile.GetTileType() == FruitsGrid.FruitGridObject.TileTypeEnum.Fruit;
     }
 
     public bool CheckTileForSnake(int x, int y)
     {
-        SnakePartsGrid.SnakePartGridObject snakeTile = _snakePartsGrid.GetSnakePartTile(new Vector2(x, y));
+        SnakePartsGrid.SnakePartGridObject snakeTile = _snakePartsGrid.GetSnakePartTile(x, y);
         return snakeTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead ||
                snakeTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart;
     }
 
     public bool CheckTileForObstacle(int x, int y)
     {
-        return _mapTilesGrid.GetMapTile(new Vector2(x, y)).GetTileType() ==
+        return _mapTilesGrid.GetMapTile(x, y).GetTileType() ==
                MapTilesGrid.MapTileGridObject.TileType.Obstacle;
     }
 
