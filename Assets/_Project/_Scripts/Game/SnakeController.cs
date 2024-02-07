@@ -1,10 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SnakeController : PlayerInputHandler
 {
+    public static event EventHandler SnakeChangedPosition;
+    
     enum MovementDirectionEnum
     {
         Up,
@@ -70,9 +73,10 @@ public class SnakeController : PlayerInputHandler
         // Get Snake Tile By This Coordinates
         SnakePartsGrid.SnakePartGridObject snakeTile = _snakePartsGrid.GetSnakePartTile(tilePos.xPos, tilePos.yPos);
         // Spawn snake head on this tile
-        snakeTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead, null, null);
+        snakeTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead, null, null, null);
         // Save snake head pos
         _snakeHead = snakeTile;
+        _snakePartsGrid.SnakeHead = _snakeHead;
     }
 
     public void StartMoving()
@@ -88,44 +92,45 @@ public class SnakeController : PlayerInputHandler
         while (_snakeState == SnakeState.Alive)
         {
             yield return new WaitForSeconds(CurrentSpeed * .001f);
-            
-            Vector2Int nextSnakeHeadPos = _snakeHead.GetCoordinates() + Get2DMovementDirection();
 
-            if (_gridsManipulator.CheckTileForEmptyOrNull(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            Vector2Int currentTilePos = _snakeHead.GetCoordinates();
+            Vector2Int nextTilePos = currentTilePos + Get2DMovementDirection();
+
+            if (_gridsManipulator.CheckTileForEmptyOrNull(nextTilePos.x, nextTilePos.y))
             {
                 _snakeState = SnakeState.Dead;
                 continue;
             }
             
             SnakePartsGrid.SnakePartGridObject nextTile =
-                _snakePartsGrid.GetSnakePartTile(nextSnakeHeadPos.x, nextSnakeHeadPos.y);
+                _snakePartsGrid.GetSnakePartTile(nextTilePos.x, nextTilePos.y);
 
-            if (_gridsManipulator.CheckTileForSnake(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            if (_gridsManipulator.CheckTileForSnake(nextTilePos.x, nextTilePos.y))
             {
                 _snakeState = SnakeState.Dead;
                 continue;
             }
-            
-            _snakeHead.ClearSnakeTileParams();
-            nextTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead, null, null);
-            _snakeHead = nextTile;
+
+            SwitchOldToNewTile(ref _snakeHead, nextTile);
+            _snakePartsGrid.SnakeHead = _snakeHead;
             
             MoveSnakeBodies();
 
-            if (_gridsManipulator.CheckTileForObstacle(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            if (_gridsManipulator.CheckTileForObstacle(nextTilePos.x, nextTilePos.y))
             {
                 _snakeState = SnakeState.Dead;
                 continue;
             }
 
-            if (_gridsManipulator.CheckTileForFruit(nextSnakeHeadPos.x, nextSnakeHeadPos.y))
+            if (_gridsManipulator.CheckTileForFruit(nextTilePos.x, nextTilePos.y))
             {
                 SpawnSnakeBody();
             
-                OnSnakeHitFruit?.Invoke(this, new Vector2Int(nextSnakeHeadPos.x, nextSnakeHeadPos.y));
+                OnSnakeHitFruit?.Invoke(this, new Vector2Int(nextTilePos.x, nextTilePos.y));
             }
             
             _lastStepMovementDirection = _currentMovementDirection;
+            SnakeChangedPosition?.Invoke(this, EventArgs.Empty);
         }
         
         OnSnakeDeath?.Invoke(this, EventArgs.Empty);
@@ -133,12 +138,82 @@ public class SnakeController : PlayerInputHandler
 
     private void SpawnSnakeBody()
     {
+        SnakePartsGrid.SnakePartGridObject spawnTile = null;
+        SnakePartsGrid.SnakePartGridObject nextBody = null;
+        if (!_snakeBodies.Any())
+        {
+            if (_snakeHead.GetPreviousTile() is not null)
+            {
+                spawnTile = _snakeHead.GetPreviousTile();
+                nextBody = _snakeHead;
+            }
+        }
+        else
+        {
+            SnakePartsGrid.SnakePartGridObject lastBody = _snakeBodies.Last();
+            if (lastBody.GetPreviousTile() is not null)
+            {
+                spawnTile = lastBody.GetPreviousTile();
+                nextBody = lastBody;
+            }
+        }
+
+        if (spawnTile == null || nextBody == null)
+            return;
         
+        spawnTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart, null,null, null);
+        ConnectTwoSnakeParts(nextBody, spawnTile);
+        
+        _snakeBodies.Add(spawnTile);
     }
     
     private void MoveSnakeBodies()
     {
+        if (_snakeHead.PreviousBody == null)
+            return;
+
+        List<SnakePartsGrid.SnakePartGridObject> newSnakeBodiesList = new List<SnakePartsGrid.SnakePartGridObject>();
+
+        SnakePartsGrid.SnakePartGridObject currentSnakeTile = _snakeHead;
         
+        // move others bodies to previous position of the next body
+        while (currentSnakeTile.PreviousBody != null)
+        {
+            SnakePartsGrid.SnakePartGridObject previousBodyTile = currentSnakeTile.PreviousBody;
+            SnakePartsGrid.SnakePartGridObject previousTile = currentSnakeTile.GetPreviousTile();
+            
+            //switch current body with previous tile
+            SwitchOldToNewTile(ref previousBodyTile, previousTile);
+            // Connect current body with previous body new tile
+            ConnectTwoSnakeParts(currentSnakeTile, previousBodyTile);
+            
+            newSnakeBodiesList.Add(previousBodyTile);
+
+            currentSnakeTile = previousBodyTile;
+        }
+        
+        _snakeBodies.Clear();
+        _snakeBodies = newSnakeBodiesList;
+    }
+
+    private void SwitchOldToNewTile(ref SnakePartsGrid.SnakePartGridObject oldTile,
+        SnakePartsGrid.SnakePartGridObject newTile, bool clearOldTile = true)
+    {
+        var oldTileParams = oldTile.GetSnakeTileParams();
+        
+        newTile.SetSnakeTileParams(oldTileParams.tileType, oldTileParams.nextBody, oldTileParams.previousBody, oldTile);
+        
+        if (clearOldTile)
+            oldTile.ClearSnakeTileParams();
+        
+        oldTile = newTile;
+    }
+
+    private void ConnectTwoSnakeParts(SnakePartsGrid.SnakePartGridObject nextBody,
+        SnakePartsGrid.SnakePartGridObject previousBody)
+    {
+        nextBody.PreviousBody = previousBody;
+        previousBody.NextBody = nextBody;
     }
     
     private Vector2Int Get2DMovementDirection()

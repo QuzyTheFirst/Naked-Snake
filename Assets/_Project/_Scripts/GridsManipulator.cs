@@ -99,17 +99,17 @@ public class GridsManipulator
     public MapTilesGrid.MapTileGridObject GetRandomWalkableOrSpawnpointTileWithoutSnake()
     {
         // Get All Acceptable tiles
-        List<MapTilesGrid.MapTileGridObject> allPossibleSpawnpoints =
-            _mapTilesDictionary[MapTilesGrid.MapTileGridObject.TileType.Spawnpoint];
+        List<MapTilesGrid.MapTileGridObject> allPossibleSpawnpoints = new List<MapTilesGrid.MapTileGridObject>();
+        allPossibleSpawnpoints.AddRange(_mapTilesDictionary[MapTilesGrid.MapTileGridObject.TileType.Spawnpoint]);
         allPossibleSpawnpoints.AddRange(_mapTilesDictionary[MapTilesGrid.MapTileGridObject.TileType.Walkable]);
 
         // Remove Snake Tiles From This List
-        SnakePartsGrid.SnakePartGridObject currentSnakePart = null;//_snakePartsGrid.GetSnakeHead();
+        SnakePartsGrid.SnakePartGridObject currentSnakePart = _snakePartsGrid.SnakeHead;
         while (currentSnakePart != null)
         {
             Vector2Int coordinates = currentSnakePart.GetCoordinates();
             allPossibleSpawnpoints.Remove(_mapTilesGrid.GetMapTile(coordinates.x, coordinates.y));
-            currentSnakePart = currentSnakePart.GetPreviousBody();
+            currentSnakePart = currentSnakePart.PreviousBody;
         }
 
         // Get Random Tile and Return;

@@ -6,7 +6,20 @@ using UnityEngine;
 
 public class SnakePartsGrid
 {
-    private Grid<SnakePartGridObject> _grid;
+    public event EventHandler<SnakePartGridObject> OnSnakeHeadChanged; 
+    
+    private readonly Grid<SnakePartGridObject> _grid;
+    private SnakePartGridObject _snakeHead;
+    
+    public SnakePartGridObject SnakeHead
+    {
+        get => _snakeHead;
+        set
+        {
+            _snakeHead = value;
+            OnSnakeHeadChanged?.Invoke(this, _snakeHead);
+        }
+    }
     public SnakePartsGrid(int width, int height, float cellSize, Vector3 originPosition)
     {
         _grid = new Grid<SnakePartGridObject>(width, height, cellSize, originPosition, (Grid<SnakePartGridObject> grid, int x, int y) => new SnakePartGridObject(grid, x, y));
@@ -41,10 +54,25 @@ public class SnakePartsGrid
         
         private SnakePartGridObject _nextBody;
         private SnakePartGridObject _previousBody;
+        private SnakePartGridObject _previousTile;
+
+        private float _yRotation;
         
         private int _x, _y;
 
         private Grid<SnakePartGridObject> _grid;
+        
+        public SnakePartGridObject NextBody
+        {
+            get => _nextBody;
+            set => _nextBody = value;
+        }
+
+        public SnakePartGridObject PreviousBody
+        {
+            get => _previousBody;
+            set => _previousBody = value;
+        }
 
         public SnakePartGridObject(Grid<SnakePartGridObject> grid, int x, int y)
         {
@@ -53,43 +81,40 @@ public class SnakePartsGrid
             _y = y;
 
             _tileType = TileTypeEnum.Empty;
-            _nextBody = null;
-            _previousBody = null;
+            _nextBody = default;
+            _previousBody = default;
+            _previousTile = default;
         }
 
         public void SetSnakeTileParams(TileTypeEnum tileType, SnakePartGridObject nextBody,
-            SnakePartGridObject previousBody)
+            SnakePartGridObject previousBody, SnakePartGridObject previousTile)
         {
             _tileType = tileType;
             _nextBody = nextBody;
             _previousBody = previousBody;
+            _previousTile = previousTile;
             _grid.TriggerGridObjectChanged(_x, _y);
         }
-
-        public (TileTypeEnum tileType, SnakePartGridObject nextBody, SnakePartGridObject previousBody)
-            GetSnakeTileParams()
+        
+        public (TileTypeEnum tileType, SnakePartGridObject nextBody, SnakePartGridObject previousBody, SnakePartGridObject previousTile) GetSnakeTileParams()
         {
-            return (_tileType, _nextBody, _previousBody);
+            return (_tileType, _nextBody, _previousBody, _previousTile);
         }
         
         public void ClearSnakeTileParams()
         {
             _tileType = TileTypeEnum.Empty;
-            _nextBody = null;
-            _previousBody = null;
+            _nextBody = default;
+            _previousBody = default;
+            _previousTile = default;
             _grid.TriggerGridObjectChanged(_x, _y);
         }
-
-        public SnakePartGridObject GetNextBody()
+        
+        public SnakePartGridObject GetPreviousTile()
         {
-            return _nextBody;
+            return _previousTile;
         }
-
-        public SnakePartGridObject GetPreviousBody()
-        {
-            return _previousBody;
-        }
-
+        
         public Vector2Int GetCoordinates()
         {
             return new Vector2Int(_x, _y);
