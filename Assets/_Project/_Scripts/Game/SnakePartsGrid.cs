@@ -56,7 +56,8 @@ public class SnakePartsGrid
         private SnakePartGridObject _previousBody;
         private SnakePartGridObject _previousTile;
 
-        private float _yRotation;
+        private int _id;
+        private float _rotation;
         
         private int _x, _y;
 
@@ -74,6 +75,21 @@ public class SnakePartsGrid
             set => _previousBody = value;
         }
 
+        public int ID
+        {
+            get => _id;
+        }
+
+        public float Rotation
+        {
+            get => _rotation;
+            set
+            {
+                _rotation = value;
+                _grid.TriggerGridObjectChanged(_x, _y);
+            }
+        }
+        
         public SnakePartGridObject(Grid<SnakePartGridObject> grid, int x, int y)
         {
             _grid = grid;
@@ -84,15 +100,20 @@ public class SnakePartsGrid
             _nextBody = default;
             _previousBody = default;
             _previousTile = default;
+            _id = -1;
+            _rotation = 0;
         }
 
         public void SetSnakeTileParams(TileTypeEnum tileType, SnakePartGridObject nextBody,
-            SnakePartGridObject previousBody, SnakePartGridObject previousTile)
+            SnakePartGridObject previousBody, SnakePartGridObject previousTile, int id, float yRotation)
         {
             _tileType = tileType;
             _nextBody = nextBody;
             _previousBody = previousBody;
             _previousTile = previousTile;
+            _id = id;
+            _rotation = yRotation;
+            
             _grid.TriggerGridObjectChanged(_x, _y);
         }
         
@@ -107,6 +128,8 @@ public class SnakePartsGrid
             _nextBody = default;
             _previousBody = default;
             _previousTile = default;
+            _id = default;
+            _rotation = default;
             _grid.TriggerGridObjectChanged(_x, _y);
         }
         

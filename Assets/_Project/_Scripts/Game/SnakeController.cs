@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms.Layout;
 using UnityEngine;
 
 public class SnakeController : PlayerInputHandler
 {
     public static event EventHandler SnakeChangedPosition;
-    
+
     enum MovementDirectionEnum
     {
         Up,
@@ -18,9 +19,9 @@ public class SnakeController : PlayerInputHandler
 
     private MovementDirectionEnum _currentMovementDirection = MovementDirectionEnum.Up;
     private MovementDirectionEnum _lastStepMovementDirection;
-    
+
     public static event EventHandler<Vector2Int> OnSnakeHitFruit;
-    
+
     public static event EventHandler OnSnakeDeath;
 
     private SnakePartsGrid _snakePartsGrid;
@@ -43,7 +44,7 @@ public class SnakeController : PlayerInputHandler
 
     private SnakePartsGrid.SnakePartGridObject _snakeHead;
     private List<SnakePartsGrid.SnakePartGridObject> _snakeBodies;
-    
+
     public enum SnakeState
     {
         Alive,
@@ -53,8 +54,9 @@ public class SnakeController : PlayerInputHandler
     private SnakeState _snakeState = SnakeState.Alive;
 
     private Coroutine SnakeMovingCoroutine = null;
-    
-    public void Initialize(SnakePartsGrid grid, GridsManipulator gridsManipulator, int moveEach_ms, int boostMoveEach_ms)
+
+    public void Initialize(SnakePartsGrid grid, GridsManipulator gridsManipulator, int moveEach_ms,
+        int boostMoveEach_ms)
     {
         _snakePartsGrid = grid;
         _gridsManipulator = gridsManipulator;
@@ -73,7 +75,7 @@ public class SnakeController : PlayerInputHandler
         // Get Snake Tile By This Coordinates
         SnakePartsGrid.SnakePartGridObject snakeTile = _snakePartsGrid.GetSnakePartTile(tilePos.xPos, tilePos.yPos);
         // Spawn snake head on this tile
-        snakeTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead, null, null, null);
+        snakeTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead, null, null, null, 0, 0);
         // Save snake head pos
         _snakeHead = snakeTile;
         _snakePartsGrid.SnakeHead = _snakeHead;
@@ -83,10 +85,10 @@ public class SnakeController : PlayerInputHandler
     {
         if (_snakeHead == null)
             return;
-        
+
         SnakeMovingCoroutine = StartCoroutine(SnakeMovement());
     }
-    
+
     private IEnumerator SnakeMovement()
     {
         while (_snakeState == SnakeState.Alive)
@@ -101,7 +103,7 @@ public class SnakeController : PlayerInputHandler
                 _snakeState = SnakeState.Dead;
                 continue;
             }
-            
+
             SnakePartsGrid.SnakePartGridObject nextTile =
                 _snakePartsGrid.GetSnakePartTile(nextTilePos.x, nextTilePos.y);
 
@@ -113,7 +115,7 @@ public class SnakeController : PlayerInputHandler
 
             SwitchOldToNewTile(ref _snakeHead, nextTile);
             _snakePartsGrid.SnakeHead = _snakeHead;
-            
+
             MoveSnakeBodies();
 
             if (_gridsManipulator.CheckTileForObstacle(nextTilePos.x, nextTilePos.y))
@@ -125,14 +127,16 @@ public class SnakeController : PlayerInputHandler
             if (_gridsManipulator.CheckTileForFruit(nextTilePos.x, nextTilePos.y))
             {
                 SpawnSnakeBody();
-            
+
                 OnSnakeHitFruit?.Invoke(this, new Vector2Int(nextTilePos.x, nextTilePos.y));
             }
-            
+
+            CalculateRotationsForBodies();
+
             _lastStepMovementDirection = _currentMovementDirection;
             SnakeChangedPosition?.Invoke(this, EventArgs.Empty);
         }
-        
+
         OnSnakeDeath?.Invoke(this, EventArgs.Empty);
     }
 
@@ -160,13 +164,14 @@ public class SnakeController : PlayerInputHandler
 
         if (spawnTile == null || nextBody == null)
             return;
-        
-        spawnTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart, null,null, null);
+
+        spawnTile.SetSnakeTileParams(SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart, null, null, null,
+            nextBody.ID + 1, 0);
         ConnectTwoSnakeParts(nextBody, spawnTile);
-        
+
         _snakeBodies.Add(spawnTile);
     }
-    
+
     private void MoveSnakeBodies()
     {
         if (_snakeHead.PreviousBody == null)
@@ -175,23 +180,23 @@ public class SnakeController : PlayerInputHandler
         List<SnakePartsGrid.SnakePartGridObject> newSnakeBodiesList = new List<SnakePartsGrid.SnakePartGridObject>();
 
         SnakePartsGrid.SnakePartGridObject currentSnakeTile = _snakeHead;
-        
+
         // move others bodies to previous position of the next body
         while (currentSnakeTile.PreviousBody != null)
         {
             SnakePartsGrid.SnakePartGridObject previousBodyTile = currentSnakeTile.PreviousBody;
             SnakePartsGrid.SnakePartGridObject previousTile = currentSnakeTile.GetPreviousTile();
-            
+
             //switch current body with previous tile
             SwitchOldToNewTile(ref previousBodyTile, previousTile);
             // Connect current body with previous body new tile
             ConnectTwoSnakeParts(currentSnakeTile, previousBodyTile);
-            
+
             newSnakeBodiesList.Add(previousBodyTile);
 
             currentSnakeTile = previousBodyTile;
         }
-        
+
         _snakeBodies.Clear();
         _snakeBodies = newSnakeBodiesList;
     }
@@ -200,12 +205,13 @@ public class SnakeController : PlayerInputHandler
         SnakePartsGrid.SnakePartGridObject newTile, bool clearOldTile = true)
     {
         var oldTileParams = oldTile.GetSnakeTileParams();
-        
-        newTile.SetSnakeTileParams(oldTileParams.tileType, oldTileParams.nextBody, oldTileParams.previousBody, oldTile);
-        
+
+        newTile.SetSnakeTileParams(oldTileParams.tileType, oldTileParams.nextBody, oldTileParams.previousBody, oldTile,
+            oldTile.ID, oldTile.Rotation);
+
         if (clearOldTile)
             oldTile.ClearSnakeTileParams();
-        
+
         oldTile = newTile;
     }
 
@@ -215,7 +221,49 @@ public class SnakeController : PlayerInputHandler
         nextBody.PreviousBody = previousBody;
         previousBody.NextBody = nextBody;
     }
-    
+
+    private void CalculateRotationsForBodies()
+    {
+        SnakePartsGrid.SnakePartGridObject currentPart = _snakeHead.PreviousBody;
+        while (currentPart != null)
+        {
+            SnakePartsGrid.SnakePartGridObject nextBody = currentPart.NextBody;
+            SnakePartsGrid.SnakePartGridObject previousBody = currentPart.PreviousBody;
+            
+            if (nextBody != null && previousBody != null)
+            {
+                Vector2 nextBodyDirection =
+                    nextBody.GetCoordinates() - currentPart.GetCoordinates();
+                Vector2 previousBodyDirection =
+                    previousBody.GetCoordinates() - currentPart.GetCoordinates();
+                Vector2 directionFromPreviousToNextBody = nextBodyDirection + previousBodyDirection;
+
+                if (directionFromPreviousToNextBody == Vector2.zero)
+                {
+                    float angle = Mathf.Atan2(previousBodyDirection.y, previousBodyDirection.x) * Mathf.Rad2Deg - 90;
+                    currentPart.Rotation = angle;
+                }
+                else
+                {
+                    float angle = Mathf.Atan2(directionFromPreviousToNextBody.y, directionFromPreviousToNextBody.x) *
+                        Mathf.Rad2Deg - 90;
+                    currentPart.Rotation = angle;
+                }
+            }
+
+            if (nextBody != null && previousBody == null)
+            {
+                Vector2 nextBodyDirection =
+                    nextBody.GetCoordinates() - currentPart.GetCoordinates();
+
+                float angle = Mathf.Atan2(nextBodyDirection.y, nextBodyDirection.x) * Mathf.Rad2Deg - 90;
+                currentPart.Rotation = angle;
+            }
+
+            currentPart = currentPart.PreviousBody;
+        }
+    }
+
     private Vector2Int Get2DMovementDirection()
     {
         switch (_currentMovementDirection)
@@ -243,21 +291,21 @@ public class SnakeController : PlayerInputHandler
         {
             case MovementDirectionEnum.Up:
                 return MovementDirectionEnum.Down;
-                
+
             case MovementDirectionEnum.Down:
                 return MovementDirectionEnum.Up;
-                
+
             case MovementDirectionEnum.Left:
                 return MovementDirectionEnum.Right;
-                
+
             case MovementDirectionEnum.Right:
                 return MovementDirectionEnum.Left;
-                
+
             default:
                 throw new Exception("Where are you even going?");
         }
     }
-    
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -265,7 +313,7 @@ public class SnakeController : PlayerInputHandler
         OnDownPressed += SnakeHead_OnDownPressed;
         OnLeftPressed += SnakeHead_OnLeftPressed;
         OnRightPressed += SnakeHead_OnRightPressed;
-        
+
         OnBoostButtonPressed += OnOnBoostButtonPressed;
         OnBoostButtonCanceled += OnOnBoostButtonCanceled;
     }
@@ -286,6 +334,7 @@ public class SnakeController : PlayerInputHandler
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Right;
+        _snakeHead.Rotation = 90;
     }
 
     private void SnakeHead_OnLeftPressed(object sender, EventArgs e)
@@ -294,6 +343,7 @@ public class SnakeController : PlayerInputHandler
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Left;
+        _snakeHead.Rotation = -90;
     }
 
     private void SnakeHead_OnDownPressed(object sender, EventArgs e)
@@ -302,6 +352,7 @@ public class SnakeController : PlayerInputHandler
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Down;
+        _snakeHead.Rotation = 180;
     }
 
     private void SnakeHead_OnUpPressed(object sender, EventArgs e)
@@ -310,17 +361,18 @@ public class SnakeController : PlayerInputHandler
             return;
 
         _currentMovementDirection = MovementDirectionEnum.Up;
+        _snakeHead.Rotation = 0;
     }
-    
+
     protected override void OnDisable()
     {
         base.OnDisable();
-        
+
         OnUpPressed -= SnakeHead_OnUpPressed;
         OnDownPressed -= SnakeHead_OnDownPressed;
         OnLeftPressed -= SnakeHead_OnLeftPressed;
         OnRightPressed -= SnakeHead_OnRightPressed;
-        
+
         OnBoostButtonPressed -= OnOnBoostButtonPressed;
         OnBoostButtonCanceled -= OnOnBoostButtonCanceled;
     }

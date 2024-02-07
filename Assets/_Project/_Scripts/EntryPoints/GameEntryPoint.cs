@@ -57,16 +57,20 @@ public class GameEntryPoint : MonoBehaviour
         _snakeController.Initialize(snakePartsGrid, _gridsManipulator, _moveEach_ms, _boostMoveEach_ms);
         _fruitController.Initialize(fruitsGrid, _gridsManipulator);
         
-        // Spawn Snake
-        _snakeController.SpawnSnakeHead();
-        // Spawn Fruit
-        _fruitController.SpawnFruit();
         // Game Visuals
         mapTilesGrid.SetMapTilesVisuals(_mapTilesVisual);
         snakePartsGrid.SetSnakePartsVisuals(_snakePartsVisual);
         fruitsGrid.SetFruitsGridVisuals(_fruitsVisual);
+        
+        // Spawn Snake
+        _snakeController.SpawnSnakeHead();
+        
+        // Spawn Fruit
+        _fruitController.SpawnFruit();
+        
         // Camera
         _cameraController.SetupCamera(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
+        
         // Start Game
         StartGame();
     }

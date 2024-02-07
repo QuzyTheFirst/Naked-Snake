@@ -1,21 +1,42 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SnakePartsVisual : MonoBehaviour
 {
-    private Grid<SnakePartsGrid.SnakePartGridObject> _grid;
-    private bool _updateSnake = false;
+    struct ItemToUpdate
+    {
+        public int X;
+        public int Y;
+    }
 
+    struct SnakePart
+    {
+        public Transform Part;
+        public int Id;
+    }
+    
+    [Header("Snake Parts")]
     [SerializeField] private Transform _snakeHeadPf;
     [SerializeField] private Transform _snakeBodyPf;
 
-    private List<Transform> _allSnakeParts;
+    [Header("Explosion")] 
+    [SerializeField] private ParticleSystem _explosionParticles;
+    
+    private Grid<SnakePartsGrid.SnakePartGridObject> _grid;
+    private bool _updateSnake = false;
+    
+    private List<SnakePart> _allSnakeParts;
+
+    private Queue<ItemToUpdate> _visualUpdatesQueue;
 
     private void Awake()
     {
-        _allSnakeParts = new List<Transform>();
+        _allSnakeParts = new List<SnakePart>();
+        _visualUpdatesQueue = new Queue<ItemToUpdate>();
     }
     
     public void SetGrid(Grid<SnakePartsGrid.SnakePartGridObject> grid)
@@ -30,6 +51,7 @@ public class SnakePartsVisual : MonoBehaviour
     private void OnGridObjectChanged(object sender, Grid<SnakePartsGrid.SnakePartGridObject>.OnGridObjectChangedEventArgs e)
     {
         _updateSnake = true;
+        _visualUpdatesQueue.Enqueue(new ItemToUpdate(){X = e.x, Y = e.y});
     }
     
     private void LateUpdate()
@@ -43,39 +65,120 @@ public class SnakePartsVisual : MonoBehaviour
     
     private void UpdateLevelEditorVisual()
     {
-        DeleteAllSnakes();
-        
-        _allSnakeParts.Clear();
-        
-        for(int x = 0; x < _grid.GetWidth(); x++)
+        while (_visualUpdatesQueue.Any())
         {
-            for(int y = 0; y < _grid.GetHeight(); y++)
-            {
-                int index = x * _grid.GetHeight() + y;
+            ItemToUpdate item = _visualUpdatesQueue.Dequeue();
 
-                SnakePartsGrid.SnakePartGridObject.TileTypeEnum tileType = _grid.GetGridObject(x, y).GetTileType();
+            SnakePartsGrid.SnakePartGridObject tile = _grid.GetGridObject(item.X, item.Y);
+
+            if (tile == null)
+                continue;
+            
+            SnakePartsGrid.SnakePartGridObject.TileTypeEnum tileType = tile.GetTileType();
+
+            if (tileType == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.Empty)
+                continue;
+            
+            if (_allSnakeParts.Any(part => part.Id == tile.ID))
+            {
+                //We already have this body and we need to just change it position or rotation
+                SnakePart snakePart = _allSnakeParts.Single(part => part.Id == tile.ID);
+
+                snakePart.Part.position =
+                    new Vector3(item.X, 0.25f, item.Y) * _grid.GetCellSize() + _grid.GetOriginPosition();
+                
+                snakePart.Part.rotation = Quaternion.Euler(0, tile.Rotation, 0);
+            }
+            else
+            {
+                // We have to instantiate a new body
+                Transform objToInstantiate;
+                
                 switch (tileType)
                 {
                     case SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead:
-                        _allSnakeParts.Add(Instantiate(_snakeHeadPf,
-                            new Vector3(x, 0.25f, y) * _grid.GetCellSize() + _grid.GetOriginPosition(),
-                            Quaternion.identity));
+                        objToInstantiate = _snakeHeadPf;
                         break;
                     case SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart:
-                        _allSnakeParts.Add(Instantiate(_snakeBodyPf,
-                            new Vector3(x, 0.25f, y) * _grid.GetCellSize() + _grid.GetOriginPosition(),
-                            Quaternion.identity));
+                        objToInstantiate = _snakeBodyPf;
+                        break;
+                    default:
+                        continue;
                         break;
                 }
+                
+                SnakePart snakePart = new SnakePart()
+                {
+                    Part = Instantiate(objToInstantiate,
+                        new Vector3(item.X, 0.25f, item.Y) * _grid.GetCellSize() + _grid.GetOriginPosition(),
+                        Quaternion.identity),
+                    Id = tile.ID
+                };
+                
+                _allSnakeParts.Add(snakePart);
             }
         }
     }
     
     private void DeleteAllSnakes()
     {
-        foreach (Transform snake in _allSnakeParts)
+        foreach (SnakePart snake in _allSnakeParts)
         {
-            Destroy(snake.gameObject);
+            Destroy(snake.Part.gameObject);
         }
+    }
+
+    private void BlowUpSnake()
+    {
+        Queue<Rigidbody> rigidBodies = new Queue<Rigidbody>();
+        
+        foreach (SnakePart snakePart in _allSnakeParts)
+        {
+            rigidBodies.Enqueue(snakePart.Part.GetComponent<Rigidbody>());
+        }
+        
+        StartCoroutine(Explode(rigidBodies));
+    }
+    
+    public IEnumerator Explode(Queue<Rigidbody> rigidbodies)
+    {
+        //SoundManager.Instance.Play("UhOh");
+        yield return new WaitForSeconds(.2f);
+        foreach (Rigidbody rig in rigidbodies)
+        {
+            rig.isKinematic = false;
+            rig.useGravity = true;
+
+            float randomXValue = Random.Range(-1f, 1f);
+            float randomYValue = Random.Range(0, 1f);
+            float randomZValue = Random.Range(-1f, 1f);
+
+            Vector3 randomDirection = (new Vector3(randomXValue * 5f, randomYValue * 10f, randomZValue * 5f)).normalized;
+            
+            rig.velocity = randomDirection * 10f;
+            rig.angularVelocity = new Vector3(randomXValue, randomYValue, randomZValue) * 720f;
+
+            _explosionParticles.transform.position = rig.position;
+            _explosionParticles.Play();
+            
+            SoundManager.Instance.Play("Explosion");
+            
+            yield return new WaitForSecondsRealtime(.2f);
+        }
+    }
+
+    private void OnEnable()
+    {
+        SnakeController.OnSnakeDeath += SnakeControllerOnOnSnakeDeath; 
+    }
+
+    private void SnakeControllerOnOnSnakeDeath(object sender, EventArgs e)
+    {
+        BlowUpSnake();
+    }
+
+    private void OnDisable()
+    {
+        SnakeController.OnSnakeDeath -= SnakeControllerOnOnSnakeDeath;
     }
 }
