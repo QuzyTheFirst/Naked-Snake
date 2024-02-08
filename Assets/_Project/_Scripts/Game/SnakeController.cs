@@ -7,7 +7,9 @@ using UnityEngine;
 
 public class SnakeController : PlayerInputHandler
 {
-    public static event EventHandler SnakeChangedPosition;
+    public static event EventHandler ChangedPosition;
+    public static event EventHandler BoostStarted;
+    public static event EventHandler BoostEnded; 
 
     enum MovementDirectionEnum
     {
@@ -128,13 +130,17 @@ public class SnakeController : PlayerInputHandler
             {
                 SpawnSnakeBody();
 
+                SoundManager.Instance.Play("Chew");
+                
                 OnSnakeHitFruit?.Invoke(this, new Vector2Int(nextTilePos.x, nextTilePos.y));
             }
 
             CalculateRotationsForBodies();
 
+            SoundManager.Instance.Play("Footstep");
+            
             _lastStepMovementDirection = _currentMovementDirection;
-            SnakeChangedPosition?.Invoke(this, EventArgs.Empty);
+            ChangedPosition?.Invoke(this, EventArgs.Empty);
         }
 
         OnSnakeDeath?.Invoke(this, EventArgs.Empty);
@@ -321,11 +327,13 @@ public class SnakeController : PlayerInputHandler
     private void OnOnBoostButtonCanceled(object sender, EventArgs e)
     {
         _isBoostButtonPressed = false;
+        BoostEnded?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnOnBoostButtonPressed(object sender, EventArgs e)
     {
         _isBoostButtonPressed = true;
+        BoostStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void SnakeHead_OnRightPressed(object sender, EventArgs e)

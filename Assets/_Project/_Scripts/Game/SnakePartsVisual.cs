@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class SnakePartsVisual : MonoBehaviour
@@ -17,11 +18,21 @@ public class SnakePartsVisual : MonoBehaviour
     {
         public Transform Part;
         public int Id;
+        public SnakePartsGrid.SnakePartGridObject.TileTypeEnum TileType;
     }
     
     [Header("Snake Parts")]
     [SerializeField] private Transform _snakeHeadPf;
     [SerializeField] private Transform _snakeBodyPf;
+
+    [Header("Transitions")] 
+    [SerializeField] private float _positionTransitionTime = 0.2f;
+
+    [SerializeField] private LeanTweenType _positionLeanTweenType;
+
+    [SerializeField] private float _snakeBodyRotationTransitionTime = 0.1f;
+    [SerializeField] private float _snakeHeadRotationTransitionTime = 0.05f;
+    [SerializeField] private LeanTweenType _rotationLeanTweenType;
 
     [Header("Explosion")] 
     [SerializeField] private ParticleSystem _explosionParticles;
@@ -84,15 +95,31 @@ public class SnakePartsVisual : MonoBehaviour
                 //We already have this body and we need to just change it position or rotation
                 SnakePart snakePart = _allSnakeParts.Single(part => part.Id == tile.ID);
 
-                snakePart.Part.position =
+                Vector3 newSnakePosition =
                     new Vector3(item.X, 0.25f, item.Y) * _grid.GetCellSize() + _grid.GetOriginPosition();
                 
-                snakePart.Part.rotation = Quaternion.Euler(0, tile.Rotation, 0);
+                LeanTween.move(snakePart.Part.gameObject, newSnakePosition, _positionTransitionTime)
+                    .setEase(_positionLeanTweenType);
+
+                if (snakePart.TileType == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakeHead)
+                {
+                    LeanTween.rotate(snakePart.Part.gameObject, new Vector3(0, tile.Rotation, 0),
+                            _snakeHeadRotationTransitionTime)
+                        .setEase(_rotationLeanTweenType);
+                }
+                else if (snakePart.TileType == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart)
+                {
+                    LeanTween.rotate(snakePart.Part.gameObject, new Vector3(0, tile.Rotation, 0),
+                            _snakeBodyRotationTransitionTime)
+                        .setEase(_rotationLeanTweenType);
+                }
+                
             }
             else
             {
                 // We have to instantiate a new body
                 Transform objToInstantiate;
+                
                 
                 switch (tileType)
                 {
@@ -112,7 +139,8 @@ public class SnakePartsVisual : MonoBehaviour
                     Part = Instantiate(objToInstantiate,
                         new Vector3(item.X, 0.25f, item.Y) * _grid.GetCellSize() + _grid.GetOriginPosition(),
                         Quaternion.identity),
-                    Id = tile.ID
+                    Id = tile.ID,
+                    TileType = tileType,
                 };
                 
                 _allSnakeParts.Add(snakePart);
@@ -142,7 +170,7 @@ public class SnakePartsVisual : MonoBehaviour
     
     public IEnumerator Explode(Queue<Rigidbody> rigidbodies)
     {
-        //SoundManager.Instance.Play("UhOh");
+        SoundManager.Instance.Play("UhOh");
         yield return new WaitForSeconds(.2f);
         foreach (Rigidbody rig in rigidbodies)
         {

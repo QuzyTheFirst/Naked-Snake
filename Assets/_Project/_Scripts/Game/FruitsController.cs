@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FruitController : MonoBehaviour
+public class FruitsController : MonoBehaviour
 {
     private int _collectedFruits;
     

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.Serialization;
 
 public class GameEntryPoint : MonoBehaviour
@@ -18,9 +19,12 @@ public class GameEntryPoint : MonoBehaviour
     [SerializeField] private Sprite _testMap;
     [SerializeField] private LevelGridGenerator _levelGridGenerator;
     [SerializeField] private SnakeController _snakeController;
-    [SerializeField] private FruitController _fruitController;
+    [SerializeField] private FruitsController fruitsController;
     [SerializeField] private CameraController _cameraController;
-
+    [SerializeField] private GameLevelController _gameLevelController;
+    [SerializeField] private InGameUI _inGameUI;
+    [SerializeField] private PostProcessVolume _postProcessVolume;
+    
     [Header("Visuals")] 
     [SerializeField] private MapTilesVisual _mapTilesVisual;
     [SerializeField] private SnakePartsVisual _snakePartsVisual;
@@ -41,12 +45,11 @@ public class GameEntryPoint : MonoBehaviour
         LevelToLoadInfo lvl = FindObjectOfType<LevelToLoadInfo>();
         
         // Check if there is level
-        /*if (lvl == null)
-            return;*/
+        if (lvl == null)
+            return;
         
         // Initialize Grids
-        //MapTilesGrid mapTilesGrid = _levelGenerator.GenerateLevel(lvl.LevelSprite.texture);
-        MapTilesGrid mapTilesGrid = _levelGridGenerator.GenerateLevel(_testMap.texture, _cellSize, _originPosition);
+        MapTilesGrid mapTilesGrid = _levelGridGenerator.GenerateLevel(lvl.LevelSprite.texture, _cellSize, _originPosition);
         SnakePartsGrid snakePartsGrid = new SnakePartsGrid(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(),_cellSize, _originPosition);
         FruitsGrid fruitsGrid = new FruitsGrid(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
         
@@ -55,29 +58,21 @@ public class GameEntryPoint : MonoBehaviour
         
         // Give SnakeController and FruitController their grids and GridsManipulator
         _snakeController.Initialize(snakePartsGrid, _gridsManipulator, _moveEach_ms, _boostMoveEach_ms);
-        _fruitController.Initialize(fruitsGrid, _gridsManipulator);
+        fruitsController.Initialize(fruitsGrid, _gridsManipulator);
         
         // Game Visuals
         mapTilesGrid.SetMapTilesVisuals(_mapTilesVisual);
         snakePartsGrid.SetSnakePartsVisuals(_snakePartsVisual);
         fruitsGrid.SetFruitsGridVisuals(_fruitsVisual);
         
-        // Spawn Snake
-        _snakeController.SpawnSnakeHead();
-        
-        // Spawn Fruit
-        _fruitController.SpawnFruit();
+        //UI
+        _inGameUI.Initialize(_gameLevelController, _postProcessVolume);
         
         // Camera
         _cameraController.SetupCamera(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
         
-        // Start Game
-        StartGame();
-    }
-
-    private void StartGame()
-    {
-        _snakeController.StartMoving();
-        Debug.Log("Snake Started Moving...");
+        // Game Level Controller
+        _gameLevelController.Initialize(_snakeController, fruitsController, _levelLoader);
+        _gameLevelController.InitializeGame();
     }
 }

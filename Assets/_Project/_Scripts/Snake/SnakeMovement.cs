@@ -247,13 +247,13 @@ public class SnakeMovement : PlayerInputHandler
 
     private void OnOnBoostButtonCanceled(object sender, EventArgs e)
     {
-        _inGameUI.ToggleShiftText(false);
+        //_inGameUI.ToggleShiftText(false);
         _currentMoveEach_ms = _normalMoveEach_ms;
     }
 
     private void OnOnBoostButtonPressed(object sender, EventArgs e)
     {
-        _inGameUI.ToggleShiftText(true);
+        //_inGameUI.ToggleShiftText(true);
         _currentMoveEach_ms = _boostMoveEach_ms;
     }
 

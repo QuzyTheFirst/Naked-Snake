@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering.PostProcessing;
 
 public class InGameUI : UIInputHandler
 {
@@ -18,48 +20,44 @@ public class InGameUI : UIInputHandler
     [SerializeField] private GameObject _deathMenu;
     [SerializeField] private Text _deathMenuTextField;
 
+    [Header("Beginning Menu")] 
+    [SerializeField] private GameObject _beginningMenu;
+
     [Header("First Selected Options")]
     [SerializeField] private GameObject _pauseMenuFirst;
     [SerializeField] private GameObject _deathMenuFirst;
-
-    private LevelLoader _levelLoader;
-    private GameStateController _gameStateController;
-    private MapController _mapChanger;
+    
+    private GameLevelController _gameLevelController;
 
     private Coroutine _stepProgressBarCoroutine;
 
-    private bool _isDeathMenuActivated = false;
-
-    public void Initialize(LevelLoader levelLoader, GameStateController gameStateController, MapController mapChanger)
+    private LensDistortion m_LensDistortion;
+    
+    public void Initialize(GameLevelController gameLevelController, PostProcessVolume postProcessVolume)
     {
-        _levelLoader = levelLoader;
-        _gameStateController = gameStateController;
-        _mapChanger = mapChanger;
+        _gameLevelController = gameLevelController;
+        postProcessVolume.profile.TryGetSettings(out m_LensDistortion);
     }
 
     public void ContinueBtn()
     {
-        _gameStateController.ContinueGame();
+        _gameLevelController.ContinueGame();
+        ClosePauseMenu();
         SoundManager.Instance.Play("ButtonClick");
     }
 
     public void MainMenuBtn()
     {
-        _levelLoader.LoadMainMenu();
+        _gameLevelController.LevelLoader.LoadMainMenu();
         SoundManager.Instance.Play("ButtonClick");
     }
 
     public void RestartBtn()
     {
-        DeactivateDeathMenu();
-        _gameStateController.ContinueGame();
+        _gameLevelController.RestartGame();
         SoundManager.Instance.Play("ButtonClick");
     }
-
-    public void UpdateApplesTextField(int apples)
-    {
-        _applesTextField.SetText($"{apples}");
-    }
+    
 
     public void OpenPauseMenu()
     {
@@ -72,30 +70,14 @@ public class InGameUI : UIInputHandler
         _pauseMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(null);
     }
-
-    public void ToggleShiftText(bool value)
-    {
-        _shiftText.SetActive(value);
-    }
-
+    
     public void ActivateDeathMenu()
     {
         _deathMenu.SetActive(true);
-        _gameStateController.ContinueGame();
+        _deathMenuTextField.text = $"Game Over!\nIs your snake on a diet?\nYou have eaten just {_applesTextField.text} fruit(s)!\nTry to feed it more!";
+        SoundManager.Instance.Play("LostSound");
+        
         EventSystem.current.SetSelectedGameObject(_deathMenuFirst);
-        _isDeathMenuActivated = true;
-    }
-
-    public void SetDeathMenuText(string text)
-    {
-        _deathMenuTextField.text = text;
-    }
-
-    public void DeactivateDeathMenu()
-    {
-        _deathMenu.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(null);
-        _isDeathMenuActivated = false;
     }
     
     protected  override void OnEnable()
@@ -103,27 +85,62 @@ public class InGameUI : UIInputHandler
         base.OnEnable();
         
         OnPauseButtonPressed += InGameUI_OnPauseButtonPressed;
-        FruitsCollector.OnCollectedFruitAmountChanged += FruitsCollector_OnCollectedFruitAmountChanged;
+        OnStartGameButtonPerformed += InGameUI_OnStartGameButtonPerformed;
+        SnakeController.OnSnakeDeath += SnakeControllerOnOnSnakeDeath;
+        SnakeController.BoostStarted += SnakeControllerOnBoostStarted;
+        SnakeController.BoostEnded += SnakeControllerOnBoostEnded;
+        FruitsController.OnCollectedFruitAmountChanged += FruitsController_OnCollectedFruitAmountChanged;
     }
 
-
-    private void FruitsCollector_OnCollectedFruitAmountChanged(object sender, int fruitsCollectedAmount)
+    private void SnakeControllerOnBoostEnded(object sender, EventArgs e)
     {
-        UpdateApplesTextField(fruitsCollectedAmount);
+        LeanTween.value(gameObject, m_LensDistortion.intensity.value, -5, 0.5f);
+    }
+
+    private void SnakeControllerOnBoostStarted(object sender, EventArgs e)
+    {
+        LeanTween.value(gameObject, m_LensDistortion.intensity.value, -20, 0.5f);
+    }
+
+    private void InGameUI_OnStartGameButtonPerformed(object sender, EventArgs e)
+    {
+        if (_gameLevelController.GameState != GameLevelController.GameStateEnum.Beginning)
+            return;
+
+        _beginningMenu.gameObject.SetActive(false);
+        _gameLevelController.StartGame();
+    }
+
+    private void SnakeControllerOnOnSnakeDeath(object sender, EventArgs e)
+    {
+        StartCoroutine(OpenDeathMenuIn(3));
+        
+        IEnumerator OpenDeathMenuIn(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            ActivateDeathMenu();
+        }
+    }
+
+    private void FruitsController_OnCollectedFruitAmountChanged(object sender, int fruitsCollectedAmount)
+    {
+        _applesTextField.SetText($"{fruitsCollectedAmount}");
     }
 
     private void InGameUI_OnPauseButtonPressed(object sender, EventArgs e)
     {
-        if (_isDeathMenuActivated)
+        if (_gameLevelController.GameState == GameLevelController.GameStateEnum.Ended)
             return;
         
-        switch (_gameStateController.CurrentGameState)
+        switch (_gameLevelController.IsPaused)
         {
-            case GameStateController.GameState.Active:
-                _gameStateController.PauseGame();
+            case true:
+                _gameLevelController.ContinueGame();
+                ClosePauseMenu();
                 break;
-            case GameStateController.GameState.Paused:
-                _gameStateController.ContinueGame();
+            case false:
+                _gameLevelController.PauseGame();
+                OpenPauseMenu();
                 break;
         }
         SoundManager.Instance.Play("ButtonClick");
@@ -134,6 +151,10 @@ public class InGameUI : UIInputHandler
         base.OnDisable();
 
         OnPauseButtonPressed -= InGameUI_OnPauseButtonPressed;
-        FruitsCollector.OnCollectedFruitAmountChanged -= FruitsCollector_OnCollectedFruitAmountChanged;
+        OnStartGameButtonPerformed -= InGameUI_OnStartGameButtonPerformed;
+        SnakeController.OnSnakeDeath -= SnakeControllerOnOnSnakeDeath;
+        SnakeController.BoostStarted -= SnakeControllerOnBoostStarted;
+        SnakeController.BoostEnded -= SnakeControllerOnBoostEnded;
+        FruitsController.OnCollectedFruitAmountChanged -= FruitsController_OnCollectedFruitAmountChanged;
     }
 }

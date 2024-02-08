@@ -35,6 +35,15 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""StartGame"",
+                    ""type"": ""Button"",
+                    ""id"": ""d944e5a4-f8ae-4566-9e75-715230636af3"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -66,8 +75,30 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
                     ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0627e163-e67c-4ab8-a51c-2104fabbf105"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""StartGame"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4abe4bb5-f94d-402c-89cd-596ceed75ba3"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""StartGame"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -102,6 +133,7 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
         // Map
         m_Map = asset.FindActionMap("Map", throwIfNotFound: true);
         m_Map_Pause = m_Map.FindAction("Pause", throwIfNotFound: true);
+        m_Map_StartGame = m_Map.FindAction("StartGame", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -164,11 +196,13 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Map;
     private List<IMapActions> m_MapActionsCallbackInterfaces = new List<IMapActions>();
     private readonly InputAction m_Map_Pause;
+    private readonly InputAction m_Map_StartGame;
     public struct MapActions
     {
         private @UIControls m_Wrapper;
         public MapActions(@UIControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Pause => m_Wrapper.m_Map_Pause;
+        public InputAction @StartGame => m_Wrapper.m_Map_StartGame;
         public InputActionMap Get() { return m_Wrapper.m_Map; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -181,6 +215,9 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
+            @StartGame.started += instance.OnStartGame;
+            @StartGame.performed += instance.OnStartGame;
+            @StartGame.canceled += instance.OnStartGame;
         }
 
         private void UnregisterCallbacks(IMapActions instance)
@@ -188,6 +225,9 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
+            @StartGame.started -= instance.OnStartGame;
+            @StartGame.performed -= instance.OnStartGame;
+            @StartGame.canceled -= instance.OnStartGame;
         }
 
         public void RemoveCallbacks(IMapActions instance)
@@ -226,5 +266,6 @@ public partial class @UIControls: IInputActionCollection2, IDisposable
     public interface IMapActions
     {
         void OnPause(InputAction.CallbackContext context);
+        void OnStartGame(InputAction.CallbackContext context);
     }
 }
