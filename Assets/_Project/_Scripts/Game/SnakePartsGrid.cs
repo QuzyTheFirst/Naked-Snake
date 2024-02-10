@@ -41,7 +41,7 @@ public class SnakePartsGrid
         return _grid.GetGridObject(x, y);
     }
     
-    public class SnakePartGridObject
+    public class SnakePartGridObject : ICloneable
     {
         public enum TileTypeEnum
         {
@@ -147,6 +147,10 @@ public class SnakePartsGrid
         {
             return _tileType;
         }
-        
+
+        public object Clone()
+        {
+            return new SnakePartGridObject(_grid, _x, _y);
+        }
     }
 }

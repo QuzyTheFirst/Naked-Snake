@@ -54,17 +54,20 @@ public class SnakeController : PlayerInputHandler
     }
 
     private SnakeState _snakeState = SnakeState.Alive;
+    private GameLevelController _gameLevelController;
 
     private Coroutine SnakeMovingCoroutine = null;
 
     public void Initialize(SnakePartsGrid grid, GridsManipulator gridsManipulator, int moveEach_ms,
-        int boostMoveEach_ms)
+        int boostMoveEach_ms, GameLevelController gameLevelController)
     {
         _snakePartsGrid = grid;
         _gridsManipulator = gridsManipulator;
         _moveEach_ms = moveEach_ms;
         _boostMoveEach_ms = boostMoveEach_ms;
 
+        _gameLevelController = gameLevelController;
+        
         _snakeBodies = new List<SnakePartsGrid.SnakePartGridObject>();
     }
 
@@ -108,18 +111,29 @@ public class SnakeController : PlayerInputHandler
 
             SnakePartsGrid.SnakePartGridObject nextTile =
                 _snakePartsGrid.GetSnakePartTile(nextTilePos.x, nextTilePos.y);
-
+            
+            // TACTIC START (Fake Snake Head Move)
+            // Create Fake Head
+            SnakePartsGrid.SnakePartGridObject fakeSnakeHead = nextTile.Clone() as SnakePartsGrid.SnakePartGridObject;
+            fakeSnakeHead.SetSnakeTileParams(_snakeHead.GetTileType(), _snakeHead.NextBody, _snakeHead.PreviousBody, _snakeHead, _snakeHead.ID, _snakeHead.Rotation);
+            // Cut the real one
+            _snakeHead.ClearSnakeTileParams();
+            // Move Snake Bodies with fake snake head
+            MoveSnakeBodies(fakeSnakeHead);
+            // If tile for head contains snake part then kill snake
             if (_gridsManipulator.CheckTileForSnake(nextTilePos.x, nextTilePos.y))
             {
+                // TODO: make snake visuals look right
                 _snakeState = SnakeState.Dead;
                 continue;
             }
-
-            SwitchOldToNewTile(ref _snakeHead, nextTile);
+            // Copy snake fake head to real grid
+            MakeFakeHeadARealOne(fakeSnakeHead, ref nextTile);
+            // Make fake head a real one
+            _snakeHead = nextTile;
             _snakePartsGrid.SnakeHead = _snakeHead;
-
-            MoveSnakeBodies();
-
+            // TACTIC END (Fake Snake Head Move)
+            
             if (_gridsManipulator.CheckTileForObstacle(nextTilePos.x, nextTilePos.y))
             {
                 _snakeState = SnakeState.Dead;
@@ -141,6 +155,15 @@ public class SnakeController : PlayerInputHandler
             
             _lastStepMovementDirection = _currentMovementDirection;
             ChangedPosition?.Invoke(this, EventArgs.Empty);
+            
+            void MakeFakeHeadARealOne(SnakePartsGrid.SnakePartGridObject fakeHead,
+                ref SnakePartsGrid.SnakePartGridObject copyHeadToTile)
+            {
+                var fakeHeadParams = fakeHead.GetSnakeTileParams();
+        
+                copyHeadToTile.SetSnakeTileParams(fakeHeadParams.tileType, fakeHeadParams.nextBody, fakeHeadParams.previousBody, fakeHead.GetPreviousTile(),
+                    fakeHead.ID, fakeHead.Rotation);
+            }
         }
 
         OnSnakeDeath?.Invoke(this, EventArgs.Empty);
@@ -178,14 +201,14 @@ public class SnakeController : PlayerInputHandler
         _snakeBodies.Add(spawnTile);
     }
 
-    private void MoveSnakeBodies()
+    private void MoveSnakeBodies(SnakePartsGrid.SnakePartGridObject fakeSnakeHead)
     {
-        if (_snakeHead.PreviousBody == null)
+        if (fakeSnakeHead.PreviousBody == null)
             return;
 
         List<SnakePartsGrid.SnakePartGridObject> newSnakeBodiesList = new List<SnakePartsGrid.SnakePartGridObject>();
 
-        SnakePartsGrid.SnakePartGridObject currentSnakeTile = _snakeHead;
+        SnakePartsGrid.SnakePartGridObject currentSnakeTile = fakeSnakeHead;
 
         // move others bodies to previous position of the next body
         while (currentSnakeTile.PreviousBody != null)
@@ -332,12 +355,18 @@ public class SnakeController : PlayerInputHandler
 
     private void OnOnBoostButtonPressed(object sender, EventArgs e)
     {
+        if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
+            return;
+        
         _isBoostButtonPressed = true;
         BoostStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void SnakeHead_OnRightPressed(object sender, EventArgs e)
     {
+        if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
+            return;
+        
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Right)
             return;
 
@@ -347,6 +376,9 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnLeftPressed(object sender, EventArgs e)
     {
+        if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
+            return;
+        
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Left)
             return;
 
@@ -356,6 +388,9 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnDownPressed(object sender, EventArgs e)
     {
+        if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
+            return;
+        
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Down)
             return;
 
@@ -365,6 +400,9 @@ public class SnakeController : PlayerInputHandler
 
     private void SnakeHead_OnUpPressed(object sender, EventArgs e)
     {
+        if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
+            return;
+        
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Up)
             return;
 

@@ -58,7 +58,6 @@ public class InGameUI : UIInputHandler
         SoundManager.Instance.Play("ButtonClick");
     }
     
-
     public void OpenPauseMenu()
     {
         _pauseMenu.SetActive(true);
@@ -94,12 +93,18 @@ public class InGameUI : UIInputHandler
 
     private void SnakeControllerOnBoostEnded(object sender, EventArgs e)
     {
-        LeanTween.value(gameObject, m_LensDistortion.intensity.value, -5, 0.5f);
+        LeanTween.value(gameObject, m_LensDistortion.intensity.value, -5, 0.2f).setOnUpdate((float val) =>
+        {
+            m_LensDistortion.intensity.value = val;
+        });
     }
 
     private void SnakeControllerOnBoostStarted(object sender, EventArgs e)
     {
-        LeanTween.value(gameObject, m_LensDistortion.intensity.value, -20, 0.5f);
+        LeanTween.value(gameObject, m_LensDistortion.intensity.value, -12, 0.2f).setOnUpdate((float val) =>
+        {
+            m_LensDistortion.intensity.value = val;
+        });
     }
 
     private void InGameUI_OnStartGameButtonPerformed(object sender, EventArgs e)
@@ -113,6 +118,8 @@ public class InGameUI : UIInputHandler
 
     private void SnakeControllerOnOnSnakeDeath(object sender, EventArgs e)
     {
+        ClosePauseMenu();
+        
         StartCoroutine(OpenDeathMenuIn(3));
         
         IEnumerator OpenDeathMenuIn(float seconds)

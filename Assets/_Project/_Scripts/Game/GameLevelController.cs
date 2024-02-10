@@ -12,7 +12,7 @@ public class GameLevelController : MonoBehaviour
         Ended,
     }
 
-    public GameStateEnum GameState;
+    public GameStateEnum GameState { get; private set; }
     public bool IsPaused { get; private set; }
     
     private SnakeController _snakeController;

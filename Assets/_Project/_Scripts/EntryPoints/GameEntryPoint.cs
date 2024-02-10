@@ -57,7 +57,7 @@ public class GameEntryPoint : MonoBehaviour
         _gridsManipulator = new GridsManipulator(mapTilesGrid, snakePartsGrid, fruitsGrid);
         
         // Give SnakeController and FruitController their grids and GridsManipulator
-        _snakeController.Initialize(snakePartsGrid, _gridsManipulator, _moveEach_ms, _boostMoveEach_ms);
+        _snakeController.Initialize(snakePartsGrid, _gridsManipulator, _moveEach_ms, _boostMoveEach_ms, _gameLevelController);
         fruitsController.Initialize(fruitsGrid, _gridsManipulator);
         
         // Game Visuals
