@@ -142,7 +142,10 @@ public class SnakePartsVisual : MonoBehaviour
                     Id = tile.ID,
                     TileType = tileType,
                 };
-                
+
+                snakePart.Part.localScale = Vector3.zero;
+                LeanTween.scale(snakePart.Part.gameObject, Vector3.one, 0.2f);
+
                 _allSnakeParts.Add(snakePart);
             }
         }

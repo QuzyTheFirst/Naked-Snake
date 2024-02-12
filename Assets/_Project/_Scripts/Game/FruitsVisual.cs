@@ -8,7 +8,11 @@ public class FruitsVisual : MonoBehaviour
     private Grid<FruitsGrid.FruitGridObject> _grid;
     private bool _updateFruits = false;
 
+    [Header("Prefabs")]
     [SerializeField] private Transform _fruitPf;
+
+    [Header("Timing")]
+    [SerializeField] private float _fruitSpawnAnimTime = 0.2f;
 
     private List<Transform> _allFruits;
 
@@ -54,7 +58,10 @@ public class FruitsVisual : MonoBehaviour
                 switch (_grid.GetGridObject(x, y).GetTileType())
                 {
                     case FruitsGrid.FruitGridObject.TileTypeEnum.Fruit:
-                        _allFruits.Add(Instantiate(_fruitPf, new Vector3(x, 0.25f, y) * _grid.GetCellSize() + _grid.GetOriginPosition(), Quaternion.LookRotation(Vector3.down)));
+                        Transform fruit = Instantiate(_fruitPf, new Vector3(x, 0.25f, y) * _grid.GetCellSize() + _grid.GetOriginPosition(), Quaternion.LookRotation(Vector3.down));
+                        fruit.localScale = Vector3.zero;
+                        LeanTween.scale(fruit.gameObject, Vector3.one * 0.5f, _fruitSpawnAnimTime);
+                        _allFruits.Add(fruit);
                         break;
                 }
             }

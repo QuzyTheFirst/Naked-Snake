@@ -13,6 +13,7 @@ public class FruitsController : MonoBehaviour
     private List<FruitsGrid.FruitGridObject> _spawnedFruits;
 
     public static event EventHandler<int> OnCollectedFruitAmountChanged;
+    public static event EventHandler SnakeHaveEatenAllPossibleApples;
     
     private int CollectedFruits
     {
@@ -36,6 +37,13 @@ public class FruitsController : MonoBehaviour
     {
         // Get Random Spawnpoint or walkable tile without snake
         MapTilesGrid.MapTileGridObject spawnTile = _gridsManipulator.GetRandomWalkableOrSpawnpointTileWithoutSnake();
+
+        if(spawnTile == null)
+        {
+            SnakeHaveEatenAllPossibleApples?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         var tilePos = spawnTile.GetCoordinates();
         FruitsGrid.FruitGridObject fruitTile = _fruitsGrid.GetFruitTile(tilePos.xPos, tilePos.yPos);
         fruitTile.SetTileType(FruitsGrid.FruitGridObject.TileTypeEnum.Fruit);

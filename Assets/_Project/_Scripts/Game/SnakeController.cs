@@ -111,29 +111,47 @@ public class SnakeController : PlayerInputHandler
 
             SnakePartsGrid.SnakePartGridObject nextTile =
                 _snakePartsGrid.GetSnakePartTile(nextTilePos.x, nextTilePos.y);
+
             
-            // TACTIC START (Fake Snake Head Move)
-            // Create Fake Head
-            SnakePartsGrid.SnakePartGridObject fakeSnakeHead = nextTile.Clone() as SnakePartsGrid.SnakePartGridObject;
-            fakeSnakeHead.SetSnakeTileParams(_snakeHead.GetTileType(), _snakeHead.NextBody, _snakeHead.PreviousBody, _snakeHead, _snakeHead.ID, _snakeHead.Rotation);
-            // Cut the real one
-            _snakeHead.ClearSnakeTileParams();
-            // Move Snake Bodies with fake snake head
-            MoveSnakeBodies(fakeSnakeHead);
-            // If tile for head contains snake part then kill snake
-            if (_gridsManipulator.CheckTileForSnake(nextTilePos.x, nextTilePos.y))
+            // If next tile is snake part but not last then kill snake
+            if(nextTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart && nextTile != _snakeBodies.Last())
             {
-                // TODO: make snake visuals look right
                 _snakeState = SnakeState.Dead;
                 continue;
             }
-            // Copy snake fake head to real grid
-            MakeFakeHeadARealOne(fakeSnakeHead, ref nextTile);
-            // Make fake head a real one
-            _snakeHead = nextTile;
+            // If next tile is last snake part do Fake Snake Head Move
+            else if (nextTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart && nextTile == _snakeBodies.Last())
+            {
+                // TACTIC START (Fake Snake Head Move)
+                // Create Fake Head
+                SnakePartsGrid.SnakePartGridObject fakeSnakeHead = nextTile.Clone() as SnakePartsGrid.SnakePartGridObject;
+                fakeSnakeHead.SetSnakeTileParams(_snakeHead.GetTileType(), _snakeHead.NextBody, _snakeHead.PreviousBody, _snakeHead, _snakeHead.ID, _snakeHead.Rotation);
+                // Cut the real one
+                _snakeHead.ClearSnakeTileParams();
+                // Move Snake Bodies with fake snake head
+                MoveSnakeBodies(fakeSnakeHead);
+                // If tile for head contains snake part then kill snake
+                if (_gridsManipulator.CheckTileForSnake(nextTilePos.x, nextTilePos.y))
+                {
+                    // TODO: make snake visuals look right
+                    _snakeState = SnakeState.Dead;
+                    continue;
+                }
+                // Copy snake fake head to real grid
+                MakeFakeHeadARealOne(fakeSnakeHead, ref nextTile);
+                // Make fake head a real one
+                _snakeHead = nextTile;
+                // TACTIC END (Fake Snake Head Move)
+            }
+            // If next tile is clear just move snake
+            else
+            {
+                SwitchOldToNewTile(ref _snakeHead, nextTile);
+                MoveSnakeBodies(_snakeHead);
+            }
+
             _snakePartsGrid.SnakeHead = _snakeHead;
-            // TACTIC END (Fake Snake Head Move)
-            
+
             if (_gridsManipulator.CheckTileForObstacle(nextTilePos.x, nextTilePos.y))
             {
                 _snakeState = SnakeState.Dead;
@@ -201,14 +219,14 @@ public class SnakeController : PlayerInputHandler
         _snakeBodies.Add(spawnTile);
     }
 
-    private void MoveSnakeBodies(SnakePartsGrid.SnakePartGridObject fakeSnakeHead)
+    private void MoveSnakeBodies(SnakePartsGrid.SnakePartGridObject snakeHead)
     {
-        if (fakeSnakeHead.PreviousBody == null)
+        if (snakeHead.PreviousBody == null)
             return;
 
         List<SnakePartsGrid.SnakePartGridObject> newSnakeBodiesList = new List<SnakePartsGrid.SnakePartGridObject>();
 
-        SnakePartsGrid.SnakePartGridObject currentSnakeTile = fakeSnakeHead;
+        SnakePartsGrid.SnakePartGridObject currentSnakeTile = snakeHead;
 
         // move others bodies to previous position of the next body
         while (currentSnakeTile.PreviousBody != null)

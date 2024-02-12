@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -111,6 +112,9 @@ public class GridsManipulator
             allPossibleSpawnpoints.Remove(_mapTilesGrid.GetMapTile(coordinates.x, coordinates.y));
             currentSnakePart = currentSnakePart.PreviousBody;
         }
+
+        if (!allPossibleSpawnpoints.Any())
+            return null;
 
         // Get Random Tile and Return;
         int randomNumber = Random.Range(0, allPossibleSpawnpoints.Count);
