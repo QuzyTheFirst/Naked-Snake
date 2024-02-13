@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem.Processors;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
@@ -27,12 +28,15 @@ public class SnakePartsVisual : MonoBehaviour
 
     [Header("Transitions")] 
     [SerializeField] private float _positionTransitionTime = 0.2f;
-
     [SerializeField] private LeanTweenType _positionLeanTweenType;
 
     [SerializeField] private float _snakeBodyRotationTransitionTime = 0.1f;
     [SerializeField] private float _snakeHeadRotationTransitionTime = 0.05f;
     [SerializeField] private LeanTweenType _rotationLeanTweenType;
+
+    [Header("Size")]
+    [SerializeField] private int _changeSizeOfLastNBodies = 3;
+    [SerializeField] private float _sizeChangeTiming = 0.2f;
 
     [Header("Explosion")] 
     [SerializeField] private ParticleSystem _explosionParticles;
@@ -143,14 +147,34 @@ public class SnakePartsVisual : MonoBehaviour
                     TileType = tileType,
                 };
 
-                snakePart.Part.localScale = Vector3.zero;
-                LeanTween.scale(snakePart.Part.gameObject, Vector3.one, 0.2f);
-
                 _allSnakeParts.Add(snakePart);
+
+                snakePart.Part.localScale = Vector3.zero;
+                RecalculateLastNBodiesSize();
             }
         }
     }
     
+    private void RecalculateLastNBodiesSize()
+    {
+        int lastSnakePartId = _allSnakeParts.Max(s => s.Id);
+        int minId = lastSnakePartId - _changeSizeOfLastNBodies;
+
+        List<SnakePart> snakeParts = _allSnakeParts.Where(s => s.Id >= minId).ToList();
+
+        foreach (SnakePart snakePart in snakeParts)
+        {
+            if (snakePart.Id == 0 || snakePart.Id == minId)
+            {
+                snakePart.Part.LeanScale(Vector3.one, _sizeChangeTiming);
+                continue;
+            }
+
+            float sizeMultiplicator = 1 - Mathf.InverseLerp(minId - 1, lastSnakePartId + 1, snakePart.Id);
+            LeanTween.scale(snakePart.Part.gameObject, Vector3.one * sizeMultiplicator, _sizeChangeTiming);
+        }
+    }
+
     private void DeleteAllSnakes()
     {
         foreach (SnakePart snake in _allSnakeParts)

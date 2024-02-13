@@ -15,8 +15,11 @@ public class LevelLoader : MonoBehaviour
     
     private void Awake()
     {
-        if(_instance != null)
+        if (_instance != null)
+        {
             Destroy(gameObject);
+            return;
+        }
 
         _instance = this;
         

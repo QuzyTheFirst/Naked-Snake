@@ -13,7 +13,7 @@ public class FruitsController : MonoBehaviour
     private List<FruitsGrid.FruitGridObject> _spawnedFruits;
 
     public static event EventHandler<int> OnCollectedFruitAmountChanged;
-    public static event EventHandler SnakeHaveEatenAllPossibleApples;
+    public static event EventHandler SnakeHaveEatenAllPossibleFruits;
     
     private int CollectedFruits
     {
@@ -40,7 +40,7 @@ public class FruitsController : MonoBehaviour
 
         if(spawnTile == null)
         {
-            SnakeHaveEatenAllPossibleApples?.Invoke(this, EventArgs.Empty);
+            SnakeHaveEatenAllPossibleFruits?.Invoke(this, EventArgs.Empty);
             return;
         }
 

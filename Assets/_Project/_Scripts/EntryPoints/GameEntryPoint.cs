@@ -24,6 +24,7 @@ public class GameEntryPoint : MonoBehaviour
     [SerializeField] private GameLevelController _gameLevelController;
     [SerializeField] private InGameUI _inGameUI;
     [SerializeField] private PostProcessVolume _postProcessVolume;
+    [SerializeField] private BackgroundCanvasController _backgroundCanvasController;
     
     [Header("Visuals")] 
     [SerializeField] private MapTilesVisual _mapTilesVisual;
@@ -70,9 +71,10 @@ public class GameEntryPoint : MonoBehaviour
         
         // Camera
         _cameraController.SetupCamera(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
+        _backgroundCanvasController.SetupAnimation(mapTilesGrid.GetWidth(), mapTilesGrid.GetHeight(), _cellSize, _originPosition);
         
         // Game Level Controller
-        _gameLevelController.Initialize(_snakeController, fruitsController, _levelLoader);
+        _gameLevelController.Initialize(_snakeController, fruitsController, _cameraController, _levelLoader);
         _gameLevelController.InitializeGame();
     }
 }

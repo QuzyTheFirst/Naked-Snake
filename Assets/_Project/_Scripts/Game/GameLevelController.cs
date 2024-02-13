@@ -18,13 +18,17 @@ public class GameLevelController : MonoBehaviour
     private SnakeController _snakeController;
     private FruitsController _fruitsController;
     private LevelLoader _levelLoader;
-    
+    private CameraController _cameraController;
+
+    [SerializeField] private ParticleSystem _winParticles;
+
     public LevelLoader LevelLoader {get => _levelLoader;}
     
-    public void Initialize(SnakeController snakeController, FruitsController fruitsController, LevelLoader levelLoader)
+    public void Initialize(SnakeController snakeController, FruitsController fruitsController, CameraController cameraController, LevelLoader levelLoader)
     {
         _snakeController = snakeController;
         _fruitsController = fruitsController;
+        _cameraController = cameraController;
         _levelLoader = levelLoader;
     }
 
@@ -44,8 +48,6 @@ public class GameLevelController : MonoBehaviour
         _snakeController.StartMoving();
         
         GameState = GameStateEnum.IsGoing;
-        
-        Debug.Log("Game Started!");
     }
 
     public void RestartGame()
@@ -74,6 +76,7 @@ public class GameLevelController : MonoBehaviour
     private void OnEnable()
     {
         SnakeController.OnSnakeDeath += SnakeControllerOnOnSnakeDeath;
+        FruitsController.SnakeHaveEatenAllPossibleFruits += SnakeController_OnSnakeHaveEatenAllPossibleFruits;
     }
 
     private void SnakeControllerOnOnSnakeDeath(object sender, EventArgs e)
@@ -84,8 +87,26 @@ public class GameLevelController : MonoBehaviour
         GameState = GameStateEnum.Ended;
     }
 
+    private void SnakeController_OnSnakeHaveEatenAllPossibleFruits(object sender, EventArgs e)
+    {
+        if (IsPaused)
+            ContinueGame();
+
+        GameState = GameStateEnum.Ended;
+
+        // Stop Snake
+        _snakeController.StopMoving();
+        // Play Win Sound
+        SoundManager.Instance.Play("WinSound");
+        // Place win particles at the center of the map
+        _winParticles.transform.position = Vector3.Scale(_cameraController.transform.position, new Vector3(1, 0, 1));
+        // Play Win Particles
+        _winParticles.Play();
+    }
+
     private void OnDisable()
     {
         SnakeController.OnSnakeDeath -= SnakeControllerOnOnSnakeDeath;
+        FruitsController.SnakeHaveEatenAllPossibleFruits -= SnakeController_OnSnakeHaveEatenAllPossibleFruits;
     }
 }

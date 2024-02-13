@@ -20,19 +20,23 @@ public class InGameUI : UIInputHandler
     [SerializeField] private GameObject _deathMenu;
     [SerializeField] private Text _deathMenuTextField;
 
-    [Header("Beginning Menu")] 
+    [Header("Win Menu")]
+    [SerializeField] private GameObject _winMenu;
+
+    [Header("Beginning Menu")]
     [SerializeField] private GameObject _beginningMenu;
 
     [Header("First Selected Options")]
     [SerializeField] private GameObject _pauseMenuFirst;
     [SerializeField] private GameObject _deathMenuFirst;
-    
+    [SerializeField] private GameObject _winMenuFirst;
+
     private GameLevelController _gameLevelController;
 
     private Coroutine _stepProgressBarCoroutine;
 
     private LensDistortion m_LensDistortion;
-    
+
     public void Initialize(GameLevelController gameLevelController, PostProcessVolume postProcessVolume)
     {
         _gameLevelController = gameLevelController;
@@ -57,7 +61,7 @@ public class InGameUI : UIInputHandler
         _gameLevelController.RestartGame();
         SoundManager.Instance.Play("ButtonClick");
     }
-    
+
     public void OpenPauseMenu()
     {
         _pauseMenu.SetActive(true);
@@ -69,16 +73,23 @@ public class InGameUI : UIInputHandler
         _pauseMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(null);
     }
-    
+
     public void ActivateDeathMenu()
     {
         _deathMenu.SetActive(true);
         _deathMenuTextField.text = $"Game Over!\nIs your snake on a diet?\nYou have eaten just {_applesTextField.text} fruit(s)!\nTry to feed it more!";
         SoundManager.Instance.Play("LostSound");
-        
+
         EventSystem.current.SetSelectedGameObject(_deathMenuFirst);
     }
-    
+
+    public void ActivateWinMenu()
+    {
+        _winMenu.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(_winMenuFirst);
+    }
+
     protected  override void OnEnable()
     {
         base.OnEnable();
@@ -89,6 +100,7 @@ public class InGameUI : UIInputHandler
         SnakeController.BoostStarted += SnakeControllerOnBoostStarted;
         SnakeController.BoostEnded += SnakeControllerOnBoostEnded;
         FruitsController.OnCollectedFruitAmountChanged += FruitsController_OnCollectedFruitAmountChanged;
+        FruitsController.SnakeHaveEatenAllPossibleFruits += SnakeController_OnSnakeHaveEatenAllPossibleFruits;
     }
 
     private void SnakeControllerOnBoostEnded(object sender, EventArgs e)
@@ -129,6 +141,19 @@ public class InGameUI : UIInputHandler
         }
     }
 
+    private void SnakeController_OnSnakeHaveEatenAllPossibleFruits(object sender, EventArgs e)
+    {
+        ClosePauseMenu();
+
+        StartCoroutine(OpenWinMenuIn(3));
+
+        IEnumerator OpenWinMenuIn(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            ActivateWinMenu();
+        }
+    }
+
     private void FruitsController_OnCollectedFruitAmountChanged(object sender, int fruitsCollectedAmount)
     {
         _applesTextField.SetText($"{fruitsCollectedAmount}");
@@ -163,5 +188,6 @@ public class InGameUI : UIInputHandler
         SnakeController.BoostStarted -= SnakeControllerOnBoostStarted;
         SnakeController.BoostEnded -= SnakeControllerOnBoostEnded;
         FruitsController.OnCollectedFruitAmountChanged -= FruitsController_OnCollectedFruitAmountChanged;
+        FruitsController.SnakeHaveEatenAllPossibleFruits -= SnakeController_OnSnakeHaveEatenAllPossibleFruits;
     }
 }

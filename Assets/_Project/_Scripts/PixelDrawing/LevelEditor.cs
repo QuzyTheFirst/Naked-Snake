@@ -56,7 +56,7 @@ public class LevelEditor : LevelEditorInputHandler
         _currentBrushType = brushType;
     }
 
-    public void SaveMap()
+    public void TrySaveMap()
     {
         try
         {
@@ -64,11 +64,11 @@ public class LevelEditor : LevelEditorInputHandler
         }
         catch (Exception ex)
         {
-            Debug.LogError(ex.Message);
+            throw;
         }
     }
 
-    public void LoadMap()
+    public void TryLoadMap()
     {
         try
         {
@@ -77,7 +77,7 @@ public class LevelEditor : LevelEditorInputHandler
         }
         catch (Exception ex)
         {
-            Debug.LogError(ex.Message);
+            throw;
         }
     }
     

@@ -9,7 +9,7 @@ public class SnakeController : PlayerInputHandler
 {
     public static event EventHandler ChangedPosition;
     public static event EventHandler BoostStarted;
-    public static event EventHandler BoostEnded; 
+    public static event EventHandler BoostEnded;
 
     enum MovementDirectionEnum
     {
@@ -67,7 +67,7 @@ public class SnakeController : PlayerInputHandler
         _boostMoveEach_ms = boostMoveEach_ms;
 
         _gameLevelController = gameLevelController;
-        
+
         _snakeBodies = new List<SnakePartsGrid.SnakePartGridObject>();
     }
 
@@ -94,6 +94,15 @@ public class SnakeController : PlayerInputHandler
         SnakeMovingCoroutine = StartCoroutine(SnakeMovement());
     }
 
+    public void StopMoving()
+    {
+        if (SnakeMovingCoroutine == null)
+            return;
+
+        StopCoroutine(SnakeMovingCoroutine);
+        SnakeMovingCoroutine = null;
+    }
+
     private IEnumerator SnakeMovement()
     {
         while (_snakeState == SnakeState.Alive)
@@ -112,9 +121,9 @@ public class SnakeController : PlayerInputHandler
             SnakePartsGrid.SnakePartGridObject nextTile =
                 _snakePartsGrid.GetSnakePartTile(nextTilePos.x, nextTilePos.y);
 
-            
+
             // If next tile is snake part but not last then kill snake
-            if(nextTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart && nextTile != _snakeBodies.Last())
+            if (nextTile.GetTileType() == SnakePartsGrid.SnakePartGridObject.TileTypeEnum.SnakePart && nextTile != _snakeBodies.Last())
             {
                 _snakeState = SnakeState.Dead;
                 continue;
@@ -163,22 +172,22 @@ public class SnakeController : PlayerInputHandler
                 SpawnSnakeBody();
 
                 SoundManager.Instance.Play("Chew");
-                
+
                 OnSnakeHitFruit?.Invoke(this, new Vector2Int(nextTilePos.x, nextTilePos.y));
             }
 
             CalculateRotationsForBodies();
 
             SoundManager.Instance.Play("Footstep");
-            
+
             _lastStepMovementDirection = _currentMovementDirection;
             ChangedPosition?.Invoke(this, EventArgs.Empty);
-            
+
             void MakeFakeHeadARealOne(SnakePartsGrid.SnakePartGridObject fakeHead,
                 ref SnakePartsGrid.SnakePartGridObject copyHeadToTile)
             {
                 var fakeHeadParams = fakeHead.GetSnakeTileParams();
-        
+
                 copyHeadToTile.SetSnakeTileParams(fakeHeadParams.tileType, fakeHeadParams.nextBody, fakeHeadParams.previousBody, fakeHead.GetPreviousTile(),
                     fakeHead.ID, fakeHead.Rotation);
             }
@@ -276,7 +285,7 @@ public class SnakeController : PlayerInputHandler
         {
             SnakePartsGrid.SnakePartGridObject nextBody = currentPart.NextBody;
             SnakePartsGrid.SnakePartGridObject previousBody = currentPart.PreviousBody;
-            
+
             if (nextBody != null && previousBody != null)
             {
                 Vector2 nextBodyDirection =
@@ -375,7 +384,7 @@ public class SnakeController : PlayerInputHandler
     {
         if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
             return;
-        
+
         _isBoostButtonPressed = true;
         BoostStarted?.Invoke(this, EventArgs.Empty);
     }
@@ -384,7 +393,7 @@ public class SnakeController : PlayerInputHandler
     {
         if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
             return;
-        
+
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Right)
             return;
 
@@ -396,7 +405,7 @@ public class SnakeController : PlayerInputHandler
     {
         if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
             return;
-        
+
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Left)
             return;
 
@@ -408,7 +417,7 @@ public class SnakeController : PlayerInputHandler
     {
         if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
             return;
-        
+
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Down)
             return;
 
@@ -420,7 +429,7 @@ public class SnakeController : PlayerInputHandler
     {
         if (_gameLevelController.GameState != GameLevelController.GameStateEnum.IsGoing || _gameLevelController.IsPaused)
             return;
-        
+
         if (GetOpposingMovementDirection(_lastStepMovementDirection) == MovementDirectionEnum.Up)
             return;
 
@@ -439,5 +448,10 @@ public class SnakeController : PlayerInputHandler
 
         OnBoostButtonPressed -= OnOnBoostButtonPressed;
         OnBoostButtonCanceled -= OnOnBoostButtonCanceled;
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("I am being destroyed");
     }
 }

@@ -46,12 +46,26 @@ public class LevelEditorUI : UIInputHandler
 
     public void Save()
     {
-        _levelEditor.SaveMap();
+        try
+        {
+            _levelEditor.TrySaveMap();
+        }
+        catch (Exception ex)
+        {
+            _errorLogger.text = ex.Message;
+        }
     }
 
     public void Load()
     {
-        _levelEditor.LoadMap();
+        try
+        {
+            _levelEditor.TryLoadMap();
+        }
+        catch (Exception ex)
+        {
+            _errorLogger.text = ex.Message;
+        }
     }
 
     public void ObstacleColor()
