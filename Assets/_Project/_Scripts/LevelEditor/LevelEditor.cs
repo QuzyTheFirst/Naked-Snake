@@ -62,7 +62,7 @@ public class LevelEditor : LevelEditorInputHandler
         {
             _levelEditorSaveLoad.Save();
         }
-        catch (Exception ex)
+        catch
         {
             throw;
         }
@@ -75,7 +75,7 @@ public class LevelEditor : LevelEditorInputHandler
             Texture2D map = _levelEditorSaveLoad.Load();
             _levelEditorGrid.SetLevelEditorTiles(map);
         }
-        catch (Exception ex)
+        catch
         {
             throw;
         }

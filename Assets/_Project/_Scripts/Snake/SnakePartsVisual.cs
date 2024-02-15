@@ -135,7 +135,6 @@ public class SnakePartsVisual : MonoBehaviour
                         break;
                     default:
                         continue;
-                        break;
                 }
                 
                 SnakePart snakePart = new SnakePart()

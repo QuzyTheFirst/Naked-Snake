@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms.Layout;
 using UnityEngine;
 
 public class SnakeController : PlayerInputHandler
@@ -448,10 +447,5 @@ public class SnakeController : PlayerInputHandler
 
         OnBoostButtonPressed -= OnOnBoostButtonPressed;
         OnBoostButtonCanceled -= OnOnBoostButtonCanceled;
-    }
-
-    private void OnDestroy()
-    {
-        Debug.Log("I am being destroyed");
     }
 }

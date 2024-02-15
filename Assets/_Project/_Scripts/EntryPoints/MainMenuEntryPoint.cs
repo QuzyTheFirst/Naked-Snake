@@ -13,7 +13,7 @@ public class MainMenuEntryPoint : MonoBehaviour
     
     private void Start()
     {
-        //Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60;
         Time.timeScale = 1;
         
         _levelLoader = FindObjectOfType<LevelLoader>();

@@ -4,9 +4,6 @@ using UnityEngine;
 public class LevelGridGenerator : MonoBehaviour
 {
     [SerializeField] private ColorToPrefab[] colorMappings;
-
-    private List<GridTile> _gridTiles;
-    private List<Tile> _tiles;
     
     public MapTilesGrid GenerateLevel(Texture2D map, float cellSize, Vector3 originPosition)
     {
